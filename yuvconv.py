@@ -197,6 +197,42 @@ def convert_yuv2rgb_ycbcr_hdtv_computer(Y, Cb, Cr):
             yuvcommon.normalize(B))
 
 
+# YCoCg Color Space (https://en.wikipedia.org/wiki/YCoCg)
+def convert_rgb2yuv_ycocg(R, G, B):
+    Y  =  R >> 2 + G >> 1 + B >> 2  # NOQA: E221,E222
+    Co =  R >> 1          - B >> 1  # NOQA: E221,E222
+    Cg = -R >> 2 + G >> 1 - B >> 2  # NOQA: E221,E222
+    # no normalization needed
+    return Y, Co, Cg
+
+
+def convert_yuv2rgb_ycocg(Y, Co, Cg):
+    R = Y + Co + Cg  # NOQA: E221,E222
+    G = Y      + Cg  # NOQA: E221,E222
+    B = Y - Co - Cg  # NOQA: E221,E222
+    # no normalization needed
+    return R, G, B
+
+
+# YCoCg-R Color Space (https://en.wikipedia.org/wiki/YCoCg)
+def convert_rgb2yuv_ycocgr(R, G, B):
+    Co = R - B
+    tmp = B + Co >> 1
+    Cg = G - tmp
+    Y = tmp + Cg >> 1
+    # no normalization needed
+    return Y, Co, Cg
+
+
+def convert_yuv2rgb_ycocgr(Y, Co, Cg):
+    tmp = Y - Cg >> 1
+    G = Cg + tmp
+    B = tmp - Co >> 1
+    R = B + Co
+    # no normalization needed
+    return R, G, B
+
+
 VALID_CONVERSION_FUNCTION = {
     'unit': lambda x, y, z: (x, y, z),
     'rgb2yuv.sdtv.basic': convert_rgb2yuv_sdtv_basic,
@@ -217,6 +253,10 @@ VALID_CONVERSION_FUNCTION = {
     'yuv2rgb.ycbcr.hdtv.digital': convert_yuv2rgb_ycbcr_hdtv_digital,
     'rgb2yuv.ycbcr.hdtv.computer': convert_rgb2yuv_ycbcr_hdtv_computer,
     'yuv2rgb.ycbcr.hdtv.computer': convert_yuv2rgb_ycbcr_hdtv_computer,
+    'yuv2rgb.ycocg': convert_rgb2yuv_ycocg,
+    'rgb2yuv.ycocg': convert_yuv2rgb_ycocg,
+    'yuv2rgb.ycocgr': convert_rgb2yuv_ycocgr,
+    'rgb2yuv.ycocgr': convert_yuv2rgb_ycocgr,
 }
 
 # per-component range of the matrix output
