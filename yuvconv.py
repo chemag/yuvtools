@@ -5,46 +5,6 @@
 
 This module converts between YUV and RGB files, using pre-defined or
 user-defined matrices.
-
-Examples:
-
-* create a yuv420p grayscale gradient (all chroma values are 127, luma
-  gradient is left-to-right)
-```
-$ ./yuvconv.py out.yuv420p.gray.yuv
-$ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i out.yuv420p.gray.yuv out.yuv420p.gray.yuv.png
-```
-
-* create a yuv420p color gradient (luma gradient is left-to-right, U gradient
-  is top-down, V gradient is bottom-up
-```
-$ ./yuvconv.py --umin 0 --umax 256 --vmin 0 --vmax 256 out.yuv420p.yuv
-$ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i out.yuv420p.yuv out.yuv420p.yuv.png
-```
-
-* create a nv12 grayscale gradient (all chroma values are 127, luma
-  gradient is left-to-right)
-```
-$ ./yuvconv.py --pix_fmt nv12 out.nv12.gray.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i out.nv12.gray.yuv out.nv12.gray.yuv.png
-```
-
-* create a nv12 color gradient (luma gradient is left-to-right, U gradient
-  is top-down, V gradient is bottom-up
-```
-$ ./yuvconv.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 out.nv12.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i out.nv12.yuv out.nv12.yuv.png
-```
-
-* create a limited-range, gray gradient
-
-```
-$ ./yuvconv.py -d --gray --limited-range /tmp/out.yuv
-Namespace(color=None, debug=1, full_range=None, gray=None, height=720, \
-  limited_range=None, outfile='/tmp/out.yuv', pix_fmt='yuv420p', umax=128, \
-  umin=127, vmax=128, vmin=127, width=1280, ymax=235, ymin=16)
-```
-
 """
 
 import argparse
@@ -64,7 +24,7 @@ def convert_rgb2yuv_yiq(R, G, B):
     return Y, I, Q
 
 
-def convert_yuv2rgb_yiq(Y, I, Q):
+def convert_yuv2rgb_yiq(Y, I, Q):  # NOQA: E741
     R = Y + 0.956 * I + 0.621 * Q  # NOQA: E201,E241,E741
     G = Y - 0.272 * I - 0.647 * Q  # NOQA: E201,E241
     B = Y - 1.107 * I + 1.704 * Q  # NOQA: E201,E241
@@ -78,14 +38,16 @@ def convert_rgb2yuv_sdtv_basic(R, G, B):
     Y =  0.299 * R + 0.587 * G + 0.114 * B  # NOQA: E201,E241,E222
     U = -0.147 * R - 0.289 * G + 0.436 * B  # NOQA: E201,E241,E222
     V =  0.615 * R - 0.515 * G - 0.100 * B  # NOQA: E201,E241,E222
-    return yuvcommon.normalize(Y), yuvcommon.normalize(U), yuvcommon.normalize(V)
+    return (yuvcommon.normalize(Y), yuvcommon.normalize(U),
+            yuvcommon.normalize(V))
 
 
 def convert_yuv2rgb_sdtv_basic(Y, U, V):
     R = Y             + 1.140 * V  # NOQA: E201,E241,E221
     G = Y - 0.395 * U - 0.581 * V  # NOQA: E201,E241,E221
     B = Y + 2.032 * U              # NOQA: E201,E241,E221
-    return yuvcommon.normalize(R), yuvcommon.normalize(G), yuvcommon.normalize(B)
+    return (yuvcommon.normalize(R), yuvcommon.normalize(G),
+            yuvcommon.normalize(B))
 
 
 # Jack, YCbCr Color Space, SDTV, Analog (page 19)
@@ -110,7 +72,8 @@ def convert_yuv2rgb_ycbcr_sdtv_analog(Y, U, V):
     R = int(256 * R)
     G = int(256 * G)
     B = int(256 * B)
-    return yuvcommon.normalize(R), yuvcommon.normalize(G), yuvcommon.normalize(B)
+    return (yuvcommon.normalize(R), yuvcommon.normalize(G),
+            yuvcommon.normalize(B))
 
 
 # Jack, YCbCr Color Space, SDTV, Digital (page 19)
@@ -120,7 +83,8 @@ def convert_rgb2yuv_ycbcr_sdtv_digital(R, G, B):
     Y  =  0.299 * R + 0.587 * G + 0.114 * B  # NOQA: E201,E241,E221,E222
     Cb = -0.172 * R - 0.339 * G + 0.511 * B  # NOQA: E201,E241,E221,E222
     Cr =  0.511 * R - 0.428 * G - 0.083 * B  # NOQA: E201,E241,E221,E222
-    return yuvcommon.normalize(Y), yuvcommon.normalize(Cb + 128), yuvcommon.normalize(Cr + 128)
+    return (yuvcommon.normalize(Y), yuvcommon.normalize(Cb + 128),
+            yuvcommon.normalize(Cr + 128))
 
 
 # Jack, YCbCr Color Space, SDTV, Digital (page 20)
@@ -138,15 +102,17 @@ def convert_rgb2yuv_ycbcr_sdtv_computer(R, G, B):
     Cb = -0.148 * R - 0.291 * G + 0.439 * B + 128  # NOQA: E201,E241,E221,E222
     Cr =  0.439 * R - 0.368 * G - 0.071 * B + 128  # NOQA: E201,E241,E221,E222
     # 8-bit YCbCr and RGB data should be saturated at the 0 and 255 levels
-    return yuvcommon.normalize(Y), yuvcommon.normalize(Cb), yuvcommon.normalize(Cr)
+    return (yuvcommon.normalize(Y), yuvcommon.normalize(Cb),
+            yuvcommon.normalize(Cr))
 
 
 def convert_yuv2rgb_ycbcr_sdtv_computer(Y, Cb, Cr):
     R = 1.164 * (Y - 16) + 1.596 * (Cr - 128)
     G = 1.164 * (Y - 16) - 0.813 * (Cr - 128) - 0.391 * (Cb - 128)
-    B = 1.164 * (Y - 16)                      + 2.018 * (Cb - 128)  # NOQA: E221
+    B = 1.164 * (Y - 16)                      + 2.018 * (Cb - 128)  # NOQA: E221,E501
     # 8-bit YCbCr and RGB data should be saturated at the 0 and 255 levels
-    return yuvcommon.normalize(R), yuvcommon.normalize(G), yuvcommon.normalize(B)
+    return (yuvcommon.normalize(R), yuvcommon.normalize(G),
+            yuvcommon.normalize(B))
 
 
 # https://en.wikipedia.org/wiki/YUV#HDTV_with_BT.709
@@ -155,14 +121,16 @@ def convert_rgb2yuv_hdtv_basic(R, G, B):
     Y =  0.2126  * R + 0.7152  * G + 0.0722  * B  # NOQA: E201,E241,E221,E222
     U = -0.09991 * R - 0.33609 * G + 0.436   * B  # NOQA: E201,E241,E221,E222
     V =  0.615   * R - 0.55861 * G - 0.05639 * B  # NOQA: E201,E241,E221,E222
-    return yuvcommon.normalize(Y), yuvcommon.normalize(U), yuvcommon.normalize(V)
+    return (yuvcommon.normalize(Y), yuvcommon.normalize(U),
+            yuvcommon.normalize(V))
 
 
 def convert_yuv2rgb_hdtv_basic(Y, U, V):
     R = Y               + 1.28033 * V  # NOQA: E201,E241,E221
     G = Y - 0.21482 * U - 0.38059 * V  # NOQA: E201,E241,E221
     B = Y + 2.12798 * U                # NOQA: E201,E241,E221
-    return yuvcommon.normalize(R), yuvcommon.normalize(G), yuvcommon.normalize(B)
+    return (yuvcommon.normalize(R), yuvcommon.normalize(G),
+            yuvcommon.normalize(B))
 
 
 # Jack, YCbCr Color Space, HDTV, Analog (page 20)
@@ -187,7 +155,8 @@ def convert_yuv2rgb_ycbcr_hdtv_analog(Y, U, V):
     R = int(256 * R)
     G = int(256 * G)
     B = int(256 * B)
-    return yuvcommon.normalize(R), yuvcommon.normalize(G), yuvcommon.normalize(B)
+    return (yuvcommon.normalize(R), yuvcommon.normalize(G),
+            yuvcommon.normalize(B))
 
 
 # Jack, YCbCr Color Space, HDTV, Digital (page 21)
@@ -215,15 +184,17 @@ def convert_rgb2yuv_ycbcr_hdtv_computer(R, G, B):
     Cb = -0.101 * R - 0.338 * G + 0.439 * B + 128  # NOQA: E201,E241,E221,E222
     Cr =  0.439 * R - 0.399 * G - 0.040 * B + 128  # NOQA: E201,E241,E221,E222
     # 8-bit YCbCr and RGB data should be saturated at the 0 and 255 levels
-    return yuvcommon.normalize(Y), yuvcommon.normalize(Cb), yuvcommon.normalize(Cr)
+    return (yuvcommon.normalize(Y), yuvcommon.normalize(Cb),
+            yuvcommon.normalize(Cr))
 
 
 def convert_yuv2rgb_ycbcr_hdtv_computer(Y, Cb, Cr):
     R = 1.164 * (Y - 16) + 1.793 * (Cr - 128)
     G = 1.164 * (Y - 16) - 0.534 * (Cr - 128) - 0.213 * (Cb - 128)
-    B = 1.164 * (Y - 16)                      + 2.115 * (Cb - 128)  # NOQA: E221
+    B = 1.164 * (Y - 16)                      + 2.115 * (Cb - 128)  # NOQA: E221,E501
     # 8-bit YCbCr and RGB data should be saturated at the 0 and 255 levels
-    return yuvcommon.normalize(R), yuvcommon.normalize(G), yuvcommon.normalize(B)
+    return (yuvcommon.normalize(R), yuvcommon.normalize(G),
+            yuvcommon.normalize(B))
 
 
 VALID_CONVERSION_FUNCTION = {
@@ -347,62 +318,73 @@ def get_options(argv):
     # parser.print_help() to get argparse.usage (large help)
     # parser.print_usage() to get argparse.usage (just usage line)
     parser = argparse.ArgumentParser(description='Generic runner argparser.')
-    parser.add_argument('-d', '--debug', action='count',
-            dest='debug', default=0,
-            help='Increase verbosity (use multiple times for more)',)
-    parser.add_argument('--quiet', action='store_const',
-            dest='debug', const=-1,
-            help='Zero verbosity',)
-    parser.add_argument('--width', action='store', type=int,
-            dest='width', default=default_values['width'],
-            metavar='WIDTH',
-            help=('use WIDTH width (default: %i)' %
-                  default_values['width']),)
-    parser.add_argument('--height', action='store', type=int,
-            dest='height', default=default_values['height'],
-            metavar='HEIGHT',
-            help=('use HEIGHT height (default: %i)' %
-                  default_values['height']),)
+    parser.add_argument(
+        '-d', '--debug', action='count',
+        dest='debug', default=0,
+        help='Increase verbosity (use multiple times for more)',)
+    parser.add_argument(
+        '--quiet', action='store_const',
+        dest='debug', const=-1,
+        help='Zero verbosity',)
+    parser.add_argument(
+        '--width', action='store', type=int,
+        dest='width', default=default_values['width'],
+        metavar='WIDTH',
+        help=('use WIDTH width (default: %i)' %
+              default_values['width']),)
+    parser.add_argument(
+        '--height', action='store', type=int,
+        dest='height', default=default_values['height'],
+        metavar='HEIGHT',
+        help=('use HEIGHT height (default: %i)' %
+              default_values['height']),)
 
     class VideoSizeAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
             namespace.width, namespace.height = [int(v) for v in
                                                  values[0].split('x')]
-    parser.add_argument('--video_size', action=VideoSizeAction, nargs=1,
-            help='use <width>x<height>',)
-    parser.add_argument('--ipix_fmt', action='store', type=str,
-            dest='ipix_fmt', default=default_values['ipix_fmt'],
-            choices=VALID_PIX_FMT,
-            metavar='INPUT_PIX_FMT',
-            help=('input pixel format %r (default: %s)' %
-                  (VALID_PIX_FMT, default_values['ipix_fmt'])),)
-    parser.add_argument('--opix_fmt', action='store', type=str,
-            dest='opix_fmt', default=default_values['opix_fmt'],
-            choices=VALID_PIX_FMT,
-            metavar='OUTPUT_PIX_FMT',
-            help=('output pixel format %r (default: %s)' %
-                  (VALID_PIX_FMT, default_values['opix_fmt'])),)
-    parser.add_argument('--conversion', action='store', type=str,
-            dest='conversion_name', default=None,
-            metavar='MATRIX',
-            help=('use MATRIX matrix %r (default { yuv2yuv: %s '
-                  'rgb2rgb: %s rgb2yuv: %s yuv2rgb: %s })' %
-                  (list(VALID_CONVERSION_FUNCTION.keys()),
-                  default_values['yuv2yuv'], default_values['rgb2rgb'],
-                  default_values['rgb2yuv'], default_values['yuv2rgb'])),)
-    parser.add_argument('-n', '--frame_number',
-                        required=False,
-                        help='frame number',
-                        type=int,
-                        default=0)
-    parser.add_argument('infile', nargs='?', type=str,
-            default=None,
-            metavar='INPUT-FILE',
-            help='input file',)
-    parser.add_argument('outfile', nargs='?', type=str,
-            default=None,
-            metavar='OUTPUT-FILE',
-            help='output file',)
+    parser.add_argument(
+        '--video_size', action=VideoSizeAction, nargs=1,
+        help='use <width>x<height>',)
+    parser.add_argument(
+        '--ipix_fmt', action='store', type=str,
+        dest='ipix_fmt', default=default_values['ipix_fmt'],
+        choices=VALID_PIX_FMT,
+        metavar='INPUT_PIX_FMT',
+        help=('input pixel format %r (default: %s)' %
+              (VALID_PIX_FMT, default_values['ipix_fmt'])),)
+    parser.add_argument(
+        '--opix_fmt', action='store', type=str,
+        dest='opix_fmt', default=default_values['opix_fmt'],
+        choices=VALID_PIX_FMT,
+        metavar='OUTPUT_PIX_FMT',
+        help=('output pixel format %r (default: %s)' %
+              (VALID_PIX_FMT, default_values['opix_fmt'])),)
+    parser.add_argument(
+        '--conversion', action='store', type=str,
+        dest='conversion_name', default=None,
+        metavar='MATRIX',
+        help=('use MATRIX matrix %r (default { yuv2yuv: %s '
+              'rgb2rgb: %s rgb2yuv: %s yuv2rgb: %s })' %
+              (list(VALID_CONVERSION_FUNCTION.keys()),
+               default_values['yuv2yuv'], default_values['rgb2rgb'],
+               default_values['rgb2yuv'], default_values['yuv2rgb'])),)
+    parser.add_argument(
+        '-n', '--frame_number',
+        required=False,
+        help='frame number',
+        type=int,
+        default=0)
+    parser.add_argument(
+        'infile', nargs='?', type=str,
+        default=None,
+        metavar='INPUT-FILE',
+        help='input file',)
+    parser.add_argument(
+        'outfile', nargs='?', type=str,
+        default=None,
+        metavar='OUTPUT-FILE',
+        help='output file',)
     # do the parsing
     options = parser.parse_args(argv[1:])
     return options

@@ -14,7 +14,8 @@ import yuvconv
 
 TEST_LIST = [
     # yuv2yuv (yuv420p -> yuv420p)
-    # ./yuvgrad.py --video_size 16x4 --pix_fmt yuv420p --range limited --predefined sdtv.uv -  |xxd
+    # ./yuvgrad.py --video_size 16x4 --pix_fmt yuv420p --range limited
+    #    --predefined sdtv.uv -  |xxd
     ['yuv420p -> yuv420p', 16, 4, 'yuv420p', """
         908d 8a88 8583 807e 7b79 7674 716f 6c6a
         908d 8a88 8583 807e 7b79 7674 716f 6c6a
@@ -443,7 +444,8 @@ TEST_LIST = [
         3734 494c 5f64 737d 8a94 9ead b3c4 cadd
     """],
     # yuv2rgb (nv12 -> rgba), HDTV.basic
-    # ./yuvgrad.py --video_size 16x4 --pix_fmt nv12 --range limited --predefined hdtv.uv -  |xxd
+    # ./yuvgrad.py --video_size 16x4 --pix_fmt nv12 --range limited
+    #    --predefined hdtv.uv -  |xxd
     ['nv12 -> rgba', 16, 4, 'nv12', """
         aca5 9f99 928c 8680 7973 6d67 605a 544e
         aca5 9f99 928c 8680 7973 6d67 605a 544e
@@ -673,8 +675,8 @@ class ConvertImageTestCase(unittest.TestCase):
             self.dumpToFile(odata, '/tmp/yuvconv.%02i.%s' % (i, opix_fmt))
             expected_odata = array('B', binascii.unhexlify(
                 ocont.replace(' ', '').replace('\n', '')))
-            self.assertEqual(expected_odata, odata, '%s (%s)' % (test_name,
-                conversion_name))
+            self.assertEqual(expected_odata, odata, '%s (%s)' % (
+                test_name, conversion_name))
             i += 1
 
 

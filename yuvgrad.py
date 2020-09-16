@@ -4,46 +4,6 @@
 """yuvgrad: A gradient generator.
 
 This module generates YUV files with smooth gradients.
-
-Examples:
-
-* create a yuv420p grayscale gradient (all chroma values are 127, luma
-  gradient is left-to-right)
-```
-$ ./yuvgrad.py out.yuv420p.gray.yuv
-$ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i out.yuv420p.gray.yuv out.yuv420p.gray.yuv.png
-```
-
-* create a yuv420p color gradient (luma gradient is left-to-right, U gradient
-  is top-down, V gradient is bottom-up
-```
-$ ./yuvgrad.py --umin 0 --umax 256 --vmin 0 --vmax 256 out.yuv420p.yuv
-$ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i out.yuv420p.yuv out.yuv420p.yuv.png
-```
-
-* create a nv12 grayscale gradient (all chroma values are 127, luma
-  gradient is left-to-right)
-```
-$ ./yuvgrad.py --pix_fmt nv12 out.nv12.gray.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i out.nv12.gray.yuv out.nv12.gray.yuv.png
-```
-
-* create a nv12 color gradient (luma gradient is left-to-right, U gradient
-  is top-down, V gradient is bottom-up
-```
-$ ./yuvgrad.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 out.nv12.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i out.nv12.yuv out.nv12.yuv.png
-```
-
-* create a limited-range, gray gradient
-
-```
-$ ./yuvgrad.py -d --predefined gray --limited-range /tmp/out.yuv
-Namespace(debug=1, height=720, outfile='/tmp/out.yuv', pix_fmt='yuv420p', \
-  predefined='gray', range='limited', ugrad='S', umax=128, umin=127, \
-  vgrad='N', vmax=128, vmin=127, width=1280, ygrad='E', ymax=235, ymin=16)
-```
-
 """
 
 import argparse
@@ -311,59 +271,70 @@ def get_options(argv):
     # parser.print_help() to get argparse.usage (large help)
     # parser.print_usage() to get argparse.usage (just usage line)
     parser = argparse.ArgumentParser(description='Generic runner argparser.')
-    parser.add_argument('-d', '--debug', action='count',
-            dest='debug', default=0,
-            help='Increase verbosity (use multiple times for more)',)
-    parser.add_argument('--quiet', action='store_const',
-            dest='debug', const=-1,
-            help='Zero verbosity',)
-    parser.add_argument('--width', action='store', type=int,
-            dest='width', default=default_values['width'],
-            metavar='WIDTH',
-            help=('use WIDTH width (default: %i)' %
-                  default_values['width']),)
-    parser.add_argument('--height', action='store', type=int,
-            dest='height', default=default_values['height'],
-            metavar='HEIGHT',
-            help=('use HEIGHT height (default: %i)' %
-                  default_values['height']),)
+    parser.add_argument(
+        '-d', '--debug', action='count',
+        dest='debug', default=0,
+        help='Increase verbosity (use multiple times for more)',)
+    parser.add_argument(
+        '--quiet', action='store_const',
+        dest='debug', const=-1,
+        help='Zero verbosity',)
+    parser.add_argument(
+        '--width', action='store', type=int,
+        dest='width', default=default_values['width'],
+        metavar='WIDTH',
+        help=('use WIDTH width (default: %i)' %
+              default_values['width']),)
+    parser.add_argument(
+        '--height', action='store', type=int,
+        dest='height', default=default_values['height'],
+        metavar='HEIGHT',
+        help=('use HEIGHT height (default: %i)' %
+              default_values['height']),)
 
     class VideoSizeAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
             namespace.width, namespace.height = [int(v) for v in
                                                  values[0].split('x')]
-    parser.add_argument('--video_size', action=VideoSizeAction, nargs=1,
-            help='use <width>x<height>',)
-    parser.add_argument('--ymin', action='store', type=int,
-            dest='ymin', default=default_values['ymin'],
-            metavar='YMIN',
-            help=('use YMIN min value for Y (default: %i)' %
-                  default_values['ymin']),)
-    parser.add_argument('--ymax', action='store', type=int,
-            dest='ymax', default=default_values['ymax'],
-            metavar='YMAX',
-            help=('use YMAX max value for Y (default: %i)' %
-                  default_values['ymax']),)
-    parser.add_argument('--umin', action='store', type=int,
-            dest='umin', default=default_values['umin'],
-            metavar='UMIN',
-            help=('use UMIN min value for U (default: %i)' %
-                  default_values['umin']),)
-    parser.add_argument('--umax', action='store', type=int,
-            dest='umax', default=default_values['umax'],
-            metavar='UMAX',
-            help=('use UMAX max value for U (default: %i)' %
-                  default_values['umax']),)
-    parser.add_argument('--vmin', action='store', type=int,
-            dest='vmin', default=default_values['vmin'],
-            metavar='VMIN',
-            help=('use VMIN min value for V (default: %i)' %
-                  default_values['vmin']),)
-    parser.add_argument('--vmax', action='store', type=int,
-            dest='vmax', default=default_values['vmax'],
-            metavar='VMAX',
-            help=('use VMAX max value for V (default: %i)' %
-                  default_values['vmax']),)
+    parser.add_argument(
+        '--video_size', action=VideoSizeAction, nargs=1,
+        help='use <width>x<height>',)
+    parser.add_argument(
+        '--ymin', action='store', type=int,
+        dest='ymin', default=default_values['ymin'],
+        metavar='YMIN',
+        help=('use YMIN min value for Y (default: %i)' %
+              default_values['ymin']),)
+    parser.add_argument(
+        '--ymax', action='store', type=int,
+        dest='ymax', default=default_values['ymax'],
+        metavar='YMAX',
+        help=('use YMAX max value for Y (default: %i)' %
+              default_values['ymax']),)
+    parser.add_argument(
+        '--umin', action='store', type=int,
+        dest='umin', default=default_values['umin'],
+        metavar='UMIN',
+        help=('use UMIN min value for U (default: %i)' %
+              default_values['umin']),)
+    parser.add_argument(
+        '--umax', action='store', type=int,
+        dest='umax', default=default_values['umax'],
+        metavar='UMAX',
+        help=('use UMAX max value for U (default: %i)' %
+              default_values['umax']),)
+    parser.add_argument(
+        '--vmin', action='store', type=int,
+        dest='vmin', default=default_values['vmin'],
+        metavar='VMIN',
+        help=('use VMIN min value for V (default: %i)' %
+              default_values['vmin']),)
+    parser.add_argument(
+        '--vmax', action='store', type=int,
+        dest='vmax', default=default_values['vmax'],
+        metavar='VMAX',
+        help=('use VMAX max value for V (default: %i)' %
+              default_values['vmax']),)
 
     class CustomAction(argparse.Action):
         def __init__(self, option_strings, dest, **kwargs):
@@ -383,52 +354,64 @@ def get_options(argv):
                     namespace.range = 'full'
                 if namespace.predefined is None:
                     namespace.predefined = 'color'
-                setattr(namespace, v, predefined_images[namespace.predefined][namespace.range][v])
+                setattr(namespace, v,
+                        predefined_images[namespace.predefined]
+                        [namespace.range][v])
             for v in VALUE_LIST_NO_RANGE:
                 if namespace.predefined is None:
                     namespace.predefined = 'color'
-                setattr(namespace, v, predefined_images[namespace.predefined][v])
+                setattr(namespace, v,
+                        predefined_images[namespace.predefined][v])
 
-    parser.add_argument('--range', action=CustomAction, nargs=1,
-            choices=RANGE_LIST,
-            help='use RANGE for Y, U, V',)
-    parser.add_argument('--full-range', action=CustomAction, nargs=0,
-            dest='range',
-            help='use FULL-RANGE for Y, U, V',)
-    parser.add_argument('--limited-range', action=CustomAction, nargs=0,
-            dest='range',
-            help='use LIMITED-RANGE for Y, U, V',)
-    parser.add_argument('--predefined', action=CustomAction, nargs=1,
-            choices=PREDEFINED_IMAGE_LIST,
-            help='use predefined image',)
-    parser.add_argument('--pix_fmt', action='store', type=str,
-            dest='pix_fmt', default=default_values['pix_fmt'],
-            choices=VALID_PIX_FMT,
-            metavar='PIX_FMT',
-            help=('chroma format %r (default: %s)' %
-                  (VALID_PIX_FMT, default_values['pix_fmt'])),)
-    parser.add_argument('--ygrad', action='store', type=str,
-            dest='ygrad', default=default_values['ygrad'],
-            choices=GRAD_LIST,
-            metavar='YGRAD',
-            help=('y gradient %r (default: %s)' %
-                  (GRAD_LIST, default_values['ygrad'])),)
-    parser.add_argument('--ugrad', action='store', type=str,
-            dest='ugrad', default=default_values['ugrad'],
-            choices=GRAD_LIST,
-            metavar='UGRAD',
-            help=('u gradient %r (default: %s)' %
-                  (GRAD_LIST, default_values['ugrad'])),)
-    parser.add_argument('--vgrad', action='store', type=str,
-            dest='vgrad', default=default_values['vgrad'],
-            choices=GRAD_LIST,
-            metavar='VGRAD',
-            help=('v gradient %r (default: %s)' %
-                  (GRAD_LIST, default_values['vgrad'])),)
-    parser.add_argument('outfile', nargs='?', type=str,
-            default=None,
-            metavar='OUTPUT-FILE',
-            help='output file',)
+    parser.add_argument(
+        '--range', action=CustomAction, nargs=1,
+        choices=RANGE_LIST,
+        help='use RANGE for Y, U, V',)
+    parser.add_argument(
+        '--full-range', action=CustomAction, nargs=0,
+        dest='range',
+        help='use FULL-RANGE for Y, U, V',)
+    parser.add_argument(
+        '--limited-range', action=CustomAction, nargs=0,
+        dest='range',
+        help='use LIMITED-RANGE for Y, U, V',)
+    parser.add_argument(
+        '--predefined', action=CustomAction, nargs=1,
+        choices=PREDEFINED_IMAGE_LIST,
+        help='use predefined image',)
+    parser.add_argument(
+        '--pix_fmt', action='store', type=str,
+        dest='pix_fmt', default=default_values['pix_fmt'],
+        choices=VALID_PIX_FMT,
+        metavar='PIX_FMT',
+        help=('chroma format %r (default: %s)' %
+              (VALID_PIX_FMT, default_values['pix_fmt'])),)
+    parser.add_argument(
+        '--ygrad', action='store', type=str,
+        dest='ygrad', default=default_values['ygrad'],
+        choices=GRAD_LIST,
+        metavar='YGRAD',
+        help=('y gradient %r (default: %s)' %
+              (GRAD_LIST, default_values['ygrad'])),)
+    parser.add_argument(
+        '--ugrad', action='store', type=str,
+        dest='ugrad', default=default_values['ugrad'],
+        choices=GRAD_LIST,
+        metavar='UGRAD',
+        help=('u gradient %r (default: %s)' %
+              (GRAD_LIST, default_values['ugrad'])),)
+    parser.add_argument(
+        '--vgrad', action='store', type=str,
+        dest='vgrad', default=default_values['vgrad'],
+        choices=GRAD_LIST,
+        metavar='VGRAD',
+        help=('v gradient %r (default: %s)' %
+              (GRAD_LIST, default_values['vgrad'])),)
+    parser.add_argument(
+        'outfile', nargs='?', type=str,
+        default=None,
+        metavar='OUTPUT-FILE',
+        help='output file',)
     # do the parsing
     options = parser.parse_args(argv[1:])
     return options

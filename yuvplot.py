@@ -63,7 +63,8 @@ def plot_histogram_help(datax, datay, plotsize, location, rowspan,
 
 
 def plot_histogram(source, name, options, ydata, udata, vdata):
-    title = '%s (%s) %s Histogram' % (name, source,
+    title = '%s (%s) %s Histogram' % (
+        name, source,
         ('diff(%s)' % options.diff) if options.diff is not None else '')
 
     fig = plt.figure(num=title, figsize=options.figsize)
@@ -116,12 +117,13 @@ def plot_distribution_help(datax, datay1, datay2, name, color):
     line, = plt.plot(datax, datay1, '-', color=color)
     line.set_label('%s.avg' % name)
     line, = plt.plot(datax, datay2, '-', linestyle='dotted', color=color)
-    #line.set_label('%s.sttdev' % name)
+    # line.set_label('%s.sttdev' % name)
 
 
 def plot_distribution(source, name, options, ydata, udata, vdata, calc_axis):
     orientation = 'horizontal' if calc_axis == 0 else 'vertical'
-    title = '%s %s Distribution' % (orientation,
+    title = '%s %s Distribution' % (
+        orientation,
         ('diff(%s)' % options.diff) if options.diff is not None else '')
 
     fig = plt.figure(num=title, figsize=options.figsize)
@@ -212,11 +214,12 @@ def plot_distribution(source, name, options, ydata, udata, vdata, calc_axis):
 def plot_map_help(datay, plotsize, location, rowspan, colspan, title,
                   xlabel, ylabel):
     plt.subplot2grid(plotsize, location, colspan=colspan, rowspan=rowspan)
-    image = plt.imshow(datay,
-                       aspect='auto',
-                       origin='lower',
-                       norm=clr.LogNorm(vmin=1 + datay.min(), vmax=1 + datay.max()),
-                       cmap=plt.cm.pink.reversed())
+    image = plt.imshow(
+        datay,
+        aspect='auto',
+        origin='lower',
+        norm=clr.LogNorm(vmin=1 + datay.min(), vmax=1 + datay.max()),
+        cmap=plt.cm.pink.reversed())
     plt.grid()
     plt.title(title, fontsize=FONTSIZE_BIG)
     plt.xlabel(xlabel, fontsize=FONTSIZE_SMALL)
@@ -226,7 +229,8 @@ def plot_map_help(datay, plotsize, location, rowspan, colspan, title,
 
 def plot_map(source, name, options, ydata, udata, vdata, calc_axis):
     orientation = 'horizontal' if calc_axis == 0 else 'vertical'
-    title = '%s (%s) %s %s Map' % (name, source,
+    title = '%s (%s) %s %s Map' % (
+        name, source,
         ('diff(%s)' % options.diff) if options.diff is not None else '',
         orientation)
 
@@ -250,7 +254,7 @@ def plot_map(source, name, options, ydata, udata, vdata, calc_axis):
         location = (row_id, 0)
         yhist = get_pixel_distribution(w, h, ydata, calc_axis)
         image = plot_map_help(yhist, plotsize, location, 1, 1, 'Y (luma)',
-            xlabel, 'luma')
+                              xlabel, 'luma')
         fig.colorbar(image)
         fig.set_facecolor('w')
         row_id += 1
@@ -261,7 +265,7 @@ def plot_map(source, name, options, ydata, udata, vdata, calc_axis):
         location = (row_id, 0)
         uhist = get_pixel_distribution(cw, ch, udata, calc_axis)
         image = plot_map_help(uhist, plotsize, location, 1, 1, 'Cb (U chroma)',
-            xlabel, 'Cb')
+                              xlabel, 'Cb')
         fig.colorbar(image)
         fig.set_facecolor('w')
         row_id += 1
@@ -269,7 +273,7 @@ def plot_map(source, name, options, ydata, udata, vdata, calc_axis):
         location = (row_id, 0)
         vhist = get_pixel_distribution(cw, ch, vdata, calc_axis)
         image = plot_map_help(vhist, plotsize, location, 1, 1, 'Cr (V chroma)',
-            xlabel, 'Cr')
+                              xlabel, 'Cr')
         fig.colorbar(image)
         fig.set_facecolor('w')
         row_id += 1
@@ -324,89 +328,106 @@ def readImage(input_file, w, h, frame_number, pix_fmt):
 def get_options(argv):
     parser = argparse.ArgumentParser()
     # debug info
-    parser.add_argument('-d', '--debug', action='count',
-            dest='debug', default=0,
-            help='Increase verbosity (use multiple times for more)',)
-    parser.add_argument('--quiet', action='store_const',
-            dest='debug', const=-1,
-            help='Zero verbosity',)
+    parser.add_argument(
+        '-d', '--debug', action='count',
+        dest='debug', default=0,
+        help='Increase verbosity (use multiple times for more)',)
+    parser.add_argument(
+        '--quiet', action='store_const',
+        dest='debug', const=-1,
+        help='Zero verbosity',)
     # input
-    parser.add_argument('--width', action='store', type=int,
-            dest='width', default=1280,
-            metavar='WIDTH',
-            help='use WIDTH width',)
-    parser.add_argument('--height', action='store', type=int,
-            dest='height', default=720,
-            metavar='HEIGHT',
-            help='use HEIGHT height',)
+    parser.add_argument(
+        '--width', action='store', type=int,
+        dest='width', default=1280,
+        metavar='WIDTH',
+        help='use WIDTH width',)
+    parser.add_argument(
+        '--height', action='store', type=int,
+        dest='height', default=720,
+        metavar='HEIGHT',
+        help='use HEIGHT height',)
 
     class VideoSizeAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
             namespace.width, namespace.height = [int(v) for v in
                                                  values[0].split('x')]
-    parser.add_argument('--video_size', action=VideoSizeAction, nargs=1,
-            help='use <width>x<height>',)
-    parser.add_argument('-f', '--pix_fmt', action='store', type=str,
-                        dest='pix_fmt', default='yuv420p',
-                        choices=VALID_PIX_FMT,
-                        metavar='PIX_FMT',
-                        help=('chroma format %r' % VALID_PIX_FMT),)
-    parser.add_argument('-n', '--frame_number',
-                        required=False,
-                        help='frame number',
-                        type=int,
-                        default=0)
-    parser.add_argument('--no_luma',
-                        required=False,
-                        action='store_true',
-                        default=False,
-                        help='Do not show luma')
-    parser.add_argument('--no_chroma',
-                        required=False,
-                        action='store_true',
-                        default=False,
-                        help='Do not show chroma')
-    parser.add_argument('--no_uvdiff',
-                        required=False,
-                        action='store_true',
-                        default=False,
-                        help='Do not show UV (chroma) diff')
+    parser.add_argument(
+        '--video_size', action=VideoSizeAction, nargs=1,
+        help='use <width>x<height>',)
+    parser.add_argument(
+        '-f', '--pix_fmt', action='store', type=str,
+        dest='pix_fmt', default='yuv420p',
+        choices=VALID_PIX_FMT,
+        metavar='PIX_FMT',
+        help=('chroma format %r' % VALID_PIX_FMT),)
+    parser.add_argument(
+        '-n', '--frame_number',
+        required=False,
+        help='frame number',
+        type=int,
+        default=0)
+    parser.add_argument(
+        '--no_luma',
+        required=False,
+        action='store_true',
+        default=False,
+        help='Do not show luma')
+    parser.add_argument(
+        '--no_chroma',
+        required=False,
+        action='store_true',
+        default=False,
+        help='Do not show chroma')
+    parser.add_argument(
+        '--no_uvdiff',
+        required=False,
+        action='store_true',
+        default=False,
+        help='Do not show UV (chroma) diff')
     # output
-    parser.add_argument('--image',
-                        required=False,
-                        help='Export as image to given name',
-                        type=str)
-    parser.add_argument('--figsize',
-                        help='Size of figure (WxH), in inches',
-                        type=str,
-                        default='10x8')
+    parser.add_argument(
+        '--image',
+        required=False,
+        help='Export as image to given name',
+        type=str)
+    parser.add_argument(
+        '--figsize',
+        help='Size of figure (WxH), in inches',
+        type=str,
+        default='10x8')
 
     # add sub-command parsers
     subparsers = parser.add_subparsers()
-    parser_hist = subparsers.add_parser('hist',
-                                       help='create a pixel histogram')
+    parser_hist = subparsers.add_parser(
+        'hist',
+        help='create a pixel histogram')
     parser_hist.set_defaults(func='hist')
-    parser_distro = subparsers.add_parser('distro',
-                                       help='create a pixel distribution')
+    parser_distro = subparsers.add_parser(
+        'distro',
+        help='create a pixel distribution')
     parser_distro.set_defaults(func='distro')
-    parser_map = subparsers.add_parser('map',
-                                       help='create a pixel map')
+    parser_map = subparsers.add_parser(
+        'map',
+        help='create a pixel map')
     parser_map.set_defaults(func='map')
 
     # input files
     for p in (parser_hist, parser_map, parser_distro):
-        p.add_argument('source', nargs='+',
-                       help='source/name list, separated with spaces')
-        p.add_argument('--diff',
-                       help='Original image to be compared to',
-                       type=str,
-                       default=None)
+        p.add_argument(
+            'source', nargs='+',
+            help='source/name list, separated with spaces')
+        p.add_argument(
+            '--diff',
+            help='Original image to be compared to',
+            type=str,
+            default=None)
 
     options = parser.parse_args(argv[1:])
 
     # post-processing
     options.figsize = (None if options.figsize is None else
-        [int(size) for size in options.figsize.split('x')])
+                       [int(size) for size in options.figsize.split('x')])
     # process source/name list
     options.source_dict = {}
     last_source = None
@@ -430,7 +451,8 @@ def process_options(options):
     w, h = options.width, options.height
 
     if options.diff is not None:
-        s_ydata, s_udata, s_vdata = readImage(options.diff, w, h,
+        s_ydata, s_udata, s_vdata = readImage(
+            options.diff, w, h,
             options.frame_number, options.pix_fmt)
 
     for source, name in options.source_dict.items():
@@ -450,9 +472,11 @@ def process_options(options):
 
         elif options.func == 'distro':
             # horizontal plot
-            figh = plot_distribution(source, name, options, ydata, udata, vdata, 0)
+            figh = plot_distribution(source, name, options,
+                                     ydata, udata, vdata, 0)
             # vertical plot
-            figv = plot_distribution(source, name, options, ydata, udata, vdata, 1)
+            figv = plot_distribution(source, name, options,
+                                     ydata, udata, vdata, 1)
 
         elif options.func == 'map':
             # horizontal plot
@@ -466,7 +490,7 @@ def process_options(options):
         figv.savefig('%s.distro.%s.%s' % (source, 'vertical', IMAGE_EXT))
 
     # XXX(chema)
-    #if options.image is None:
+    # if options.image is None:
     #    plt.show()
 
 

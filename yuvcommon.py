@@ -132,7 +132,8 @@ def get_component_locations(i, j, w, h, pix_fmt):
         # planar format, 4:2:0
         return ((w * j) + i,
                 (w * h) + ((w // 2) * (j // 2)) + (i // 2),
-                (w * h) + ((w // 2) * (h // 2)) + ((w // 2) * (j // 2)) + (i // 2))
+                (w * h) + ((w // 2) * (h // 2)) +
+                ((w // 2) * (j // 2)) + (i // 2))
     elif pix_fmt == 'nv12':
         # semi-planar format, 4:2:0
         return ((w * j) + i,
