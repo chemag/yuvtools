@@ -13,7 +13,7 @@ import yuvcommon
 
 FUNCTIONS = ["image", "pixel"]
 
-PIX_FMTS = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
+PIX_FMTS = ("yuv420p", "nv12", "rgb24", "rgba", "yuv444p", "yuyv422")
 
 
 # conversion data
@@ -310,11 +310,11 @@ def convert_pixel_wrapper(options):
     height = 1
     if options.conversion_direction == "yuv2rgb":
         ipix_fmt = "yuv444p"
-        opix_fmt = "rgba"
+        opix_fmt = "rgb24"
     elif options.conversion_direction == "rgb2yuv":
         # add the alpha channel
         idata.append(255)
-        ipix_fmt = "rgba"
+        ipix_fmt = "rgb24"
         opix_fmt = "yuv444p"
     # convert the input pixel
     odata = convert_image(

@@ -6,7 +6,7 @@ from array import array
 import sys
 
 
-PIX_FMTS = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
+PIX_FMTS = ("yuv420p", "nv12", "rgb24", "rgba", "yuv444p", "yuyv422")
 
 
 def scale_fr2lr_16_235(x):
@@ -92,7 +92,7 @@ def normalize(val):
 def is_yuv(pix_fmt):
     if pix_fmt in ("yuv420p", "nv12", "yuv444p", "yuyv422"):
         return True
-    elif pix_fmt in ("rgba"):
+    elif pix_fmt in ("rgb24", "rgba"):
         return False
     # unsupported pix_fmt
     print("error: unsupported format: %s" % pix_fmt)
@@ -105,7 +105,7 @@ def get_length_factor(pix_fmt):
         return 1.5
     elif pix_fmt in ("yuyv422"):
         return 2
-    elif pix_fmt in ("yuv444p"):
+    elif pix_fmt in ("yuv444p", "rgb24"):
         return 3
     elif pix_fmt in ("rgba"):
         return 4
@@ -155,6 +155,9 @@ def get_component_locations(i, j, w, h, pix_fmt):
             (w * j * 2) + i * 2 + u_shift,
             (w * j * 2) + i * 2 + v_shift,
         )
+    elif pix_fmt == "rgb24":
+        # packed format, 4:4:4, no alpha channel
+        return ((w * j * 4) + i * 4, (w * j * 4) + i * 4 + 1, (w * j * 4) + i * 4 + 2)
     elif pix_fmt == "rgba":
         # packed format, 4:4:4, includes alpha channel
         return ((w * j * 4) + i * 4, (w * j * 4) + i * 4 + 1, (w * j * 4) + i * 4 + 2)
