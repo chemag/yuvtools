@@ -216,46 +216,71 @@ def convert_yuv2rgb_ycocg(Y, Co, Cg):
 # YCoCg-R Color Space (https://en.wikipedia.org/wiki/YCoCg)
 def convert_rgb2yuv_ycocgr(R, G, B):
     Co = R - B
-    tmp = B + Co >> 1
+    tmp = B + (Co >> 1)
     Cg = G - tmp
-    Y = tmp + Cg >> 1
+    Y = tmp + (Cg >> 1)
     # no normalization needed
     return Y, Co, Cg
 
 
 def convert_yuv2rgb_ycocgr(Y, Co, Cg):
-    tmp = Y - Cg >> 1
+    tmp = Y - (Cg >> 1)
     G = Cg + tmp
-    B = tmp - Co >> 1
+    B = tmp - (Co >> 1)
     R = B + Co
     # no normalization needed
     return R, G, B
 
 
 VALID_CONVERSION_FUNCTION = {
-    'unit': lambda x, y, z: (x, y, z),
-    'rgb2yuv.sdtv.basic': convert_rgb2yuv_sdtv_basic,
-    'yuv2rgb.sdtv.basic': convert_yuv2rgb_sdtv_basic,
-    'rgb2yuv.yiq': convert_rgb2yuv_yiq,
-    'yuv2rgb.yiq': convert_yuv2rgb_yiq,
-    'rgb2yuv.ycbcr.sdtv.analog': convert_rgb2yuv_ycbcr_sdtv_analog,
-    'yuv2rgb.ycbcr.sdtv.analog': convert_yuv2rgb_ycbcr_sdtv_analog,
-    'rgb2yuv.ycbcr.sdtv.digital': convert_rgb2yuv_ycbcr_sdtv_digital,
-    'yuv2rgb.ycbcr.sdtv.digital': convert_yuv2rgb_ycbcr_sdtv_digital,
-    'rgb2yuv.ycbcr.sdtv.computer': convert_rgb2yuv_ycbcr_sdtv_computer,
-    'yuv2rgb.ycbcr.sdtv.computer': convert_yuv2rgb_ycbcr_sdtv_computer,
-    'rgb2yuv.hdtv.basic': convert_rgb2yuv_hdtv_basic,
-    'yuv2rgb.hdtv.basic': convert_yuv2rgb_hdtv_basic,
-    'rgb2yuv.ycbcr.hdtv.analog': convert_rgb2yuv_ycbcr_hdtv_analog,
-    'yuv2rgb.ycbcr.hdtv.analog': convert_yuv2rgb_ycbcr_hdtv_analog,
-    'rgb2yuv.ycbcr.hdtv.digital': convert_rgb2yuv_ycbcr_hdtv_digital,
-    'yuv2rgb.ycbcr.hdtv.digital': convert_yuv2rgb_ycbcr_hdtv_digital,
-    'rgb2yuv.ycbcr.hdtv.computer': convert_rgb2yuv_ycbcr_hdtv_computer,
-    'yuv2rgb.ycbcr.hdtv.computer': convert_yuv2rgb_ycbcr_hdtv_computer,
-    'yuv2rgb.ycocg': convert_rgb2yuv_ycocg,
-    'rgb2yuv.ycocg': convert_yuv2rgb_ycocg,
-    'yuv2rgb.ycocgr': convert_rgb2yuv_ycocgr,
-    'rgb2yuv.ycocgr': convert_yuv2rgb_ycocgr,
+    'unit': {
+        'yuv2yuv': lambda x, y, z: (x, y, z),
+        'rgb2rgb': lambda x, y, z: (x, y, z),
+    },
+    'sdtv.basic': {
+        'rgb2yuv': convert_rgb2yuv_sdtv_basic,
+        'yuv2rgb': convert_yuv2rgb_sdtv_basic,
+    },
+    'yiq': {
+        'rgb2yuv': convert_rgb2yuv_yiq,
+        'yuv2rgb': convert_yuv2rgb_yiq,
+    },
+    'ycbcr.sdtv.analog': {
+        'rgb2yuv': convert_rgb2yuv_ycbcr_sdtv_analog,
+        'yuv2rgb': convert_yuv2rgb_ycbcr_sdtv_analog,
+    },
+    'ycbcr.sdtv.digital': {
+        'rgb2yuv': convert_rgb2yuv_ycbcr_sdtv_digital,
+        'yuv2rgb': convert_yuv2rgb_ycbcr_sdtv_digital,
+    },
+    'ycbcr.sdtv.computer': {
+        'rgb2yuv': convert_rgb2yuv_ycbcr_sdtv_computer,
+        'yuv2rgb': convert_yuv2rgb_ycbcr_sdtv_computer,
+    },
+    'hdtv.basic': {
+        'rgb2yuv': convert_rgb2yuv_hdtv_basic,
+        'yuv2rgb': convert_yuv2rgb_hdtv_basic,
+    },
+    'ycbcr.hdtv.analog': {
+        'rgb2yuv': convert_rgb2yuv_ycbcr_hdtv_analog,
+        'yuv2rgb': convert_yuv2rgb_ycbcr_hdtv_analog,
+    },
+    'ycbcr.hdtv.digital': {
+        'rgb2yuv': convert_rgb2yuv_ycbcr_hdtv_digital,
+        'yuv2rgb': convert_yuv2rgb_ycbcr_hdtv_digital,
+    },
+    'ycbcr.hdtv.computer': {
+        'rgb2yuv': convert_rgb2yuv_ycbcr_hdtv_computer,
+        'yuv2rgb': convert_yuv2rgb_ycbcr_hdtv_computer,
+    },
+    'ycocg': {
+        'yuv2rgb': convert_rgb2yuv_ycocg,
+        'rgb2yuv': convert_yuv2rgb_ycocg,
+    },
+    'ycocgr': {
+        'yuv2rgb': convert_rgb2yuv_ycocgr,
+        'rgb2yuv': convert_yuv2rgb_ycocgr,
+    },
 }
 
 # per-component range of the matrix output
@@ -266,8 +291,8 @@ default_values = {
     'opix_fmt': 'rgba',
     'yuv2yuv': 'unit',
     'rgb2rgb': 'unit',
-    'rgb2yuv': 'rgb2yuv.ycbcr.sdtv.computer',
-    'yuv2rgb': 'yuv2rgb.ycbcr.sdtv.computer',
+    'rgb2yuv': 'ycbcr.sdtv.computer',
+    'yuv2rgb': 'ycbcr.sdtv.computer',
 }
 
 
@@ -281,18 +306,16 @@ def convert_image(idata, w, h, ipix_fmt, conversion_name, opix_fmt):
     if conversion_name is None:
         # choose the matrix
         if yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
-            # yuv2yuv
-            conversion_name = default_values['yuv2yuv']
+            conversion_type = 'yuv2yuv'
         elif yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
-            # yuv2rgb
-            conversion_name = default_values['yuv2rgb']
+            conversion_type = 'yuv2rgb'
         elif not yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
-            # rgb2yuv
-            conversion_name = default_values['rgb2yuv']
+            conversion_type = 'rgb2yuv'
         elif not yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
-            # rgb2rgb
-            conversion_name = default_values['rgb2rgb']
-    conversion_function = VALID_CONVERSION_FUNCTION[conversion_name]
+            conversion_type = 'rgb2rgb'
+    conversion_name = default_values[conversion_type]
+    conversion_function = VALID_CONVERSION_FUNCTION[conversion_name][
+        conversion_type]
 
     # convert arrays
     for j in range(0, h):
