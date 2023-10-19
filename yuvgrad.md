@@ -29,7 +29,7 @@ By default:
 Example 1: create a grayscale gradient (all chroma values are 127, luma gradient is left-to-right)
 
 ```
-$ ./yuvgrad.py /tmp/gray.yuv420p.yuv
+$ ./yuvgrad.py -o /tmp/gray.yuv420p.yuv
 $ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i /tmp/gray.yuv420p.yuv /tmp/out.yuv420p.grey.yuv.png
 ```
 
@@ -37,7 +37,7 @@ $ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i /tmp/gray.yuv
 Example 2: create a color gradient (luma gradient is left-to-right, U gradient is top-down, V gradient is bottom-up. Output pixel format is nv12 now.
 
 ```
-$ ./yuvgrad.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 /tmp/color.yuv420p.yuv
+$ ./yuvgrad.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 -o /tmp/color.yuv420p.yuv
 $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i /tmp/color.nv12.yuv /tmp/out.nv12.yuv.png
 ```
 
@@ -45,7 +45,7 @@ $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i /tmp/color.nv12.
 Example 3: create a nv12 color gradient (luma gradient is left-to-right, U gradient  is top-down, V gradient is bottom-up)
 
 ```
-$ ./yuvgrad.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 color.nv12.yuv
+$ ./yuvgrad.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 -o color.nv12.yuv
 $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i color.nv12.yuv color.nv12.yuv.png
 ```
 
@@ -53,7 +53,7 @@ $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i color.nv12.yuv c
 Example 4: create a nv12 `color_eee` gradient (Y, U, and V gradients are left-to-right).
 
 ```
-$ ./yuvgrad.py --color --pix_fmt nv12 --ygrad E --ugrad E --vgrad E color_eee.nv12.yuv
+$ ./yuvgrad.py --color --pix_fmt nv12 --ygrad E --ugrad E --vgrad E -o color_eee.nv12.yuv
 $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i color_eee.nv12.yuv color_eee.nv12.yuv.png
 ```
 
@@ -61,7 +61,7 @@ $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i color_eee.nv12.y
 Example 5: create a nv12, full-range, SDTV.UV gradient (Y, U, and V gradients are left-to-right, covering the YUV cube for SDTV (bt.601) color)
 
 ```
-$ ./yuvgrad.py --pix_fmt nv12 --predefined sdtv.uv /tmp/sdtv.uv.nv12.fr.yuv
+$ ./yuvgrad.py --pix_fmt nv12 --predefined sdtv.uv -o /tmp/sdtv.uv.nv12.fr.yuv
 $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i /tmp/sdtv.uv.nv12.fr.yuv image/sdtv.uv.nv12.fr.yuv.png
 ```
 

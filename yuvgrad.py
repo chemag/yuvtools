@@ -407,7 +407,10 @@ def get_options(argv):
         help=('v gradient %r (default: %s)' %
               (GRAD_LIST, default_values['vgrad'])),)
     parser.add_argument(
-        'outfile', nargs='?', type=str,
+        "-o",
+        "--outfile",
+        dest="outfile",
+        type=str,
         default=None,
         metavar='OUTPUT-FILE',
         help='output file',)
