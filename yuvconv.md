@@ -1,47 +1,22 @@
 # yuvconv: An rgb2yuv/yuv2rgb converter
 
-This module converts between YUV and RGB files, using pre-defined or
-user-defined matrices.
+# 1. Introduction
 
-Examples:
+This document describes yuvconv, a tool that converts images between YUV and RGB formats.
 
-* create a yuv420p grayscale gradient (all chroma values are 127, luma
-  gradient is left-to-right)
 
-```
-$ ./yuvconv.py -i out.yuv420p.gray.yuv
-$ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i out.yuv420p.gray.yuv out.yuv420p.gray.yuv.png
-```
+# 2. Operation
 
-* create a yuv420p color gradient (luma gradient is left-to-right, U gradient
-  is top-down, V gradient is bottom-up
+The tool that converts YUV and RGB images is called `yuvconv.py`.
+
+
+Example 1: convert a YUV image (nv12) to RGB (rgba) using the   a grayscale gradient (all chroma values are 127, luma gradient is left-to-right)
 
 ```
-$ ./yuvconv.py --umin 0 --umax 256 --vmin 0 --vmax 256 -i out.yuv420p.yuv
-$ ffmpeg -f rawvideo -pixel_format yuv420p -video_size 1280x720 -i out.yuv420p.yuv out.yuv420p.yuv.png
+$ ./yuvconv.py -i image/color_eee.nv12.fr.yuv --ipix_fmt nv12 --conversion sdtv.computer --opix_fmt rgba -o image/color_eee.nv12.fr.yuv.rgba
+$ ffmpeg -f rawvideo -pixel_format rgba -video_size 1280x720 -i image/color_eee.nv12.fr.yuv.rgba image/color_eee.nv12.fr.yuv.rgba.png
 ```
 
-* create a nv12 grayscale gradient (all chroma values are 127, luma
-  gradient is left-to-right)
+![Figure 1](image/color_eee.nv12.fr.yuv.rgba.png)
 
-```
-$ ./yuvconv.py --pix_fmt nv12 -i out.nv12.gray.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i out.nv12.gray.yuv out.nv12.gray.yuv.png
-```
-
-* create a nv12 color gradient (luma gradient is left-to-right, U gradient
-  is top-down, V gradient is bottom-up
-
-```
-$ ./yuvconv.py --umin 0 --umax 256 --vmin 0 --vmax 256 --pix_fmt nv12 -i out.nv12.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i out.nv12.yuv out.nv12.yuv.png
-```
-
-* create a limited-range, gray gradient
-
-```
-$ ./yuvconv.py -d --gray --limited-range -i /tmp/out.yuv
-Namespace(color=None, debug=1, full_range=None, gray=None, height=720, \
-  limited_range=None, outfile='/tmp/out.yuv', pix_fmt='yuv420p', umax=128, \
-  umin=127, vmax=128, vmin=127, width=1280, ymax=235, ymin=16)
-```
+Figure 1 shows the output of the yuvconv.py script (converted to PNG).

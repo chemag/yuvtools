@@ -245,15 +245,15 @@ VALID_CONVERSION_FUNCTION = {
         'rgb2yuv': convert_rgb2yuv_yiq,
         'yuv2rgb': convert_yuv2rgb_yiq,
     },
-    'ycbcr.sdtv.analog': {
+    'sdtv.analog': {
         'rgb2yuv': convert_rgb2yuv_ycbcr_sdtv_analog,
         'yuv2rgb': convert_yuv2rgb_ycbcr_sdtv_analog,
     },
-    'ycbcr.sdtv.digital': {
+    'sdtv.digital': {
         'rgb2yuv': convert_rgb2yuv_ycbcr_sdtv_digital,
         'yuv2rgb': convert_yuv2rgb_ycbcr_sdtv_digital,
     },
-    'ycbcr.sdtv.computer': {
+    'sdtv.computer': {
         'rgb2yuv': convert_rgb2yuv_ycbcr_sdtv_computer,
         'yuv2rgb': convert_yuv2rgb_ycbcr_sdtv_computer,
     },
@@ -261,15 +261,15 @@ VALID_CONVERSION_FUNCTION = {
         'rgb2yuv': convert_rgb2yuv_hdtv_basic,
         'yuv2rgb': convert_yuv2rgb_hdtv_basic,
     },
-    'ycbcr.hdtv.analog': {
+    'hdtv.analog': {
         'rgb2yuv': convert_rgb2yuv_ycbcr_hdtv_analog,
         'yuv2rgb': convert_yuv2rgb_ycbcr_hdtv_analog,
     },
-    'ycbcr.hdtv.digital': {
+    'hdtv.digital': {
         'rgb2yuv': convert_rgb2yuv_ycbcr_hdtv_digital,
         'yuv2rgb': convert_yuv2rgb_ycbcr_hdtv_digital,
     },
-    'ycbcr.hdtv.computer': {
+    'hdtv.computer': {
         'rgb2yuv': convert_rgb2yuv_ycbcr_hdtv_computer,
         'yuv2rgb': convert_yuv2rgb_ycbcr_hdtv_computer,
     },
@@ -289,33 +289,34 @@ default_values = {
     'height': 720,
     'ipix_fmt': 'yuv420p',
     'opix_fmt': 'rgba',
+    'conversion_type': None,
     'yuv2yuv': 'unit',
     'rgb2rgb': 'unit',
-    'rgb2yuv': 'ycbcr.sdtv.computer',
-    'yuv2rgb': 'ycbcr.sdtv.computer',
+    'rgb2yuv': 'sdtv.computer',
+    'yuv2rgb': 'sdtv.computer',
 }
 
 
-def convert_image(idata, w, h, ipix_fmt, conversion_name, opix_fmt):
+def convert_image(idata, w, h, ipix_fmt, conversion_type, opix_fmt):
     # allocate output array
     odata = array('B')
     oframe_size = int(w * h * yuvcommon.get_length_factor(opix_fmt))
     odata.extend([255] * oframe_size)
 
-    # get the actual color matrix
-    if conversion_name is None:
-        # choose the matrix
-        if yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
-            conversion_type = 'yuv2yuv'
-        elif yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
-            conversion_type = 'yuv2rgb'
-        elif not yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
-            conversion_type = 'rgb2yuv'
-        elif not yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
-            conversion_type = 'rgb2rgb'
-    conversion_name = default_values[conversion_type]
-    conversion_function = VALID_CONVERSION_FUNCTION[conversion_name][
-        conversion_type]
+    # calculate the conversion direction
+    if yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
+        conversion_direction = 'yuv2yuv'
+    elif yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
+        conversion_direction = 'yuv2rgb'
+    elif not yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
+        conversion_direction = 'rgb2yuv'
+    elif not yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
+        conversion_direction = 'rgb2rgb'
+
+    if conversion_type is None:
+        conversion_type = default_values[conversion_direction]
+    conversion_function = VALID_CONVERSION_FUNCTION[conversion_type][
+        conversion_direction]
 
     # convert arrays
     for j in range(0, h):
@@ -355,7 +356,7 @@ def process_options(options):
                                  options.ipix_fmt, options.frame_number)
     # generate gradient file
     odata = convert_image(idata, options.width, options.height,
-                          options.ipix_fmt, options.conversion_name,
+                          options.ipix_fmt, options.conversion_type,
                           options.opix_fmt)
     # write and close the file
     odata.tofile(fout)
@@ -423,14 +424,20 @@ def get_options(argv):
         help=('output pixel format %r (default: %s)' %
               (VALID_PIX_FMT, default_values['opix_fmt'])),)
     parser.add_argument(
-        '--conversion', action='store', type=str,
-        dest='conversion_name', default=None,
-        metavar='MATRIX',
-        help=('use MATRIX matrix %r (default { yuv2yuv: %s '
-              'rgb2rgb: %s rgb2yuv: %s yuv2rgb: %s })' %
-              (list(VALID_CONVERSION_FUNCTION.keys()),
-               default_values['yuv2yuv'], default_values['rgb2rgb'],
-               default_values['rgb2yuv'], default_values['yuv2rgb'])),)
+        "--conversion",
+        action="store",
+        type=str,
+        dest="conversion_type",
+        default=default_values["conversion_type"],
+        choices=list(VALID_CONVERSION_FUNCTION.keys()),
+        metavar="[%s]"
+        % (
+            " | ".join(
+                list(VALID_CONVERSION_FUNCTION.keys()),
+            )
+        ),
+        help="conversion type",
+    )
     parser.add_argument(
         '-n', '--frame_number',
         required=False,
