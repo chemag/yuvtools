@@ -50,7 +50,7 @@ $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i color.nv12.yuv c
 ```
 
 
-Example 4: create a nv12 color_eee gradient (Y, U, and V gradients are left-to-right).
+Example 4: create a nv12 `color_eee` gradient (Y, U, and V gradients are left-to-right).
 
 ```
 $ ./yuvgrad.py --color --pix_fmt nv12 --ygrad E --ugrad E --vgrad E color_eee.nv12.yuv
@@ -61,8 +61,8 @@ $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i color_eee.nv12.y
 Example 5: create a nv12, full-range, SDTV.UV gradient (Y, U, and V gradients are left-to-right, covering the YUV cube for SDTV (bt.601) color)
 
 ```
-$ ./yuvgrad.py --pix_fmt nv12 --predefined sdtv.uv /tmp/sdtv.nv12.fr.yuv
-$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i /tmp/sdtv.uv.nv12.fr.yuv /tmp/sdtv.uv.nv12.fr.yuv.png
+$ ./yuvgrad.py --pix_fmt nv12 --predefined sdtv.uv /tmp/sdtv.uv.nv12.fr.yuv
+$ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i /tmp/sdtv.uv.nv12.fr.yuv image/sdtv.uv.nv12.fr.yuv.png
 ```
 
 
