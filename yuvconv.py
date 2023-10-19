@@ -277,12 +277,12 @@ CONVERSION_FUNCTIONS = {
         "yuv2rgb": convert_yuv2rgb_ycbcr_hdtv_computer,
     },
     "ycocg": {
-        "yuv2rgb": convert_rgb2yuv_ycocg,
-        "rgb2yuv": convert_yuv2rgb_ycocg,
+        "rgb2yuv": convert_rgb2yuv_ycocg,
+        "yuv2rgb": convert_yuv2rgb_ycocg,
     },
     "ycocgr": {
-        "yuv2rgb": convert_rgb2yuv_ycocgr,
-        "rgb2yuv": convert_yuv2rgb_ycocgr,
+        "rgb2yuv": convert_rgb2yuv_ycocgr,
+        "yuv2rgb": convert_yuv2rgb_ycocgr,
     },
 }
 
