@@ -300,19 +300,14 @@ def get_options(argv):
         "func",
         type=str,
         default=default_values["func"],
-        metavar="function",
-        help="function",
+        choices=FUNCTIONS.keys(),
+        help="%s"
+        % (" | ".join("{}: {}".format(k, v) for k, v in FUNCTIONS.items())),
     )
 
     # do the parsing
     options = parser.parse_args(argv[1:])
     # check the values
-    if options.func not in FUNCTIONS:
-        print(
-            "error: invalid function (%s). Must be one of %s"
-            % (options.func, ",".join(FUNCTIONS))
-        )
-        sys.exit(-1)
     if (
         options.convert_function is not None
         and options.convert_function not in yuvconv.CONVERSION_FUNCTIONS

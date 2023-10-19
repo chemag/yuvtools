@@ -11,6 +11,8 @@ from array import array
 import sys
 import yuvcommon
 
+FUNCTIONS = ["image", "pixel"]
+
 PIX_FMTS = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
 
 
@@ -286,6 +288,8 @@ CONVERSION_FUNCTIONS = {
 
 # per-component range of the matrix output
 default_values = {
+    "func": "image",
+    "pixel": None,
     "width": 1280,
     "height": 720,
     "ipix_fmt": "yuv420p",
@@ -297,6 +301,33 @@ default_values = {
     "rgb2yuv": "sdtv.computer",
     "yuv2rgb": "sdtv.computer",
 }
+
+
+def convert_pixel_wrapper(options):
+    # prepare the input pixel
+    idata = options.pixel
+    width = 1
+    height = 1
+    if options.conversion_direction == "yuv2rgb":
+        ipix_fmt = "yuv444p"
+        opix_fmt = "rgba"
+    elif options.conversion_direction == "rgb2yuv":
+        # add the alpha channel
+        idata.append(255)
+        ipix_fmt = "rgba"
+        opix_fmt = "yuv444p"
+    # convert the input pixel
+    odata = convert_image(
+        idata,
+        width,
+        height,
+        ipix_fmt,
+        options.conversion_direction,
+        options.conversion_type,
+        opix_fmt,
+    )
+    # print the output pixel
+    print(','.join(str(i) for i in list(odata)))
 
 
 def convert_image(idata, w, h, ipix_fmt, conversion_direction, conversion_type, opix_fmt):
@@ -343,7 +374,7 @@ def convert_image(idata, w, h, ipix_fmt, conversion_direction, conversion_type, 
     return odata
 
 
-def process_options(options):
+def convert_image_wrapper(options):
     # open input file
     if options.infile == "-":
         options.infile = "/dev/fd/0"
@@ -397,6 +428,27 @@ def get_options(argv):
         dest="debug",
         const=-1,
         help="Zero verbosity",
+    )
+    parser.add_argument(
+        "--function",
+        action="store",
+        type=str,
+        dest="function",
+        default=default_values["func"],
+        choices=FUNCTIONS,
+        help="%s"
+        % (" | ".join(FUNCTIONS)),
+    )
+    class PixelAction(argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            namespace.pixel = [int(v) for v in values[0].split(",")]
+
+    parser.add_argument(
+        "--pixel",
+        dest="pixel",
+        action=PixelAction,
+        nargs=1,
+        help="use <c1>,<c2>,<c3>",
     )
     parser.add_argument(
         "--width",
@@ -474,12 +526,10 @@ def get_options(argv):
         type=str,
         dest="conversion_direction",
         default=default_values["conversion_direction"],
-        choices=list(CONVERSION_FUNCTIONS.keys()),
+        choices=CONVERSION_DIRECTIONS,
         metavar="[%s]"
         % (
-            " | ".join(
-                list(CONVERSION_FUNCTIONS.keys()),
-            )
+            " | ".join(CONVERSION_DIRECTIONS)
         ),
         help="conversion direction",
     )
@@ -520,7 +570,10 @@ def main(argv):
         options.infile = sys.stdin
     if options.outfile in (None, "-"):
         options.outfile = sys.stdout
-    process_options(options)
+    if options.function == "image":
+        convert_image_wrapper(options)
+    elif options.function == "pixel":
+        convert_pixel_wrapper(options)
 
 
 if __name__ == "__main__":
