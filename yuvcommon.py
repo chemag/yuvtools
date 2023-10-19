@@ -114,15 +114,15 @@ def get_length_factor(pix_fmt):
     sys.exit(-1)
 
 
-def read_image(fin, w, h, pix_fmt, frame_number=0):
+def read_image(infile, w, h, pix_fmt, frame_number=0):
     data = array("B")
-
     # calculate the frame size
     frame_size = int(w * h * get_length_factor(pix_fmt))
-    # seek to the right frame (for multi-frame videos)
-    if frame_number > 0:
-        fin.seek(frame_number * frame_size)
-    data.fromfile(fin, frame_size)
+    with open(infile, "rb") as fin:
+        # seek to the right frame (for multi-frame videos)
+        if frame_number > 0:
+            fin.seek(frame_number * frame_size)
+        data.fromfile(fin, frame_size)
     return data
 
 

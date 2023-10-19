@@ -345,21 +345,13 @@ def convert_image(idata, w, h, ipix_fmt, conversion_direction, conversion_type, 
 
 def process_options(options):
     # open input file
-    if options.infile != sys.stdin:
-        fin = open(options.infile, "rb")
-    else:
-        fin = sys.stdin.buffer
-    # open out file
-    if options.outfile != sys.stdout:
-        try:
-            fout = open(options.outfile, "wb")  # noqa: P201
-        except IOError:
-            print('Error: cannot open file "%s":' % options.outfile)
-    else:
-        fout = sys.stdout.buffer
+    if options.infile == "-":
+        options.infile = "/dev/fd/0"
+    if options.outfile == "-":
+        options.outfile = "/dev/fd/1"
     # read input array
     idata = yuvcommon.read_image(
-        fin, options.width, options.height, options.ipix_fmt, options.frame_number
+        options.infile, options.width, options.height, options.ipix_fmt, options.frame_number
     )
     # generate gradient file
     odata = convert_image(
@@ -371,12 +363,9 @@ def process_options(options):
         options.conversion_type,
         options.opix_fmt,
     )
-    # write and close the file
-    odata.tofile(fout)
-    if options.infile != sys.stdin:
-        fin.close()
-    if options.outfile != sys.stdout:
-        fout.close()
+    # write the output file
+    with open(options.outfile, "wb") as fout:
+        odata.tofile(fout)
 
 
 def get_options(argv):

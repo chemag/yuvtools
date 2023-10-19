@@ -294,10 +294,9 @@ def plot_map(source, name, options, ydata, udata, vdata, calc_axis):
     fig.savefig("%s.map.%s.%s" % (source, orientation, IMAGE_EXT))
 
 
-def readImage(input_file, w, h, frame_number, pix_fmt):
+def read_image(infile, w, h, frame_number, pix_fmt):
     # get the full image
-    with open(input_file, "rb") as fin:
-        data = yuvcommon.read_image(fin, w, h, pix_fmt, frame_number)
+    data = yuvcommon.read_image(infile, w, h, pix_fmt, frame_number)
 
     # get luma and chroma (4:2:0) dimensions
     ysize = int(w * h)
@@ -475,7 +474,7 @@ def process_options(options):
     w, h = options.width, options.height
 
     if options.diff is not None:
-        s_ydata, s_udata, s_vdata = readImage(
+        s_ydata, s_udata, s_vdata = read_image(
             options.diff, w, h, options.frame_number, options.pix_fmt
         )
 
@@ -484,7 +483,7 @@ def process_options(options):
             print('processing file: "%s" name: "%s"' % (source, name))
 
         # read input image
-        ydata, udata, vdata = readImage(
+        ydata, udata, vdata = read_image(
             source, w, h, options.frame_number, options.pix_fmt
         )
         if options.diff is not None:
