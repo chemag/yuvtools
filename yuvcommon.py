@@ -6,7 +6,7 @@ from array import array
 import sys
 
 
-VALID_PIX_FMT = ('yuv420p', 'nv12', 'rgba', 'yuv444p', 'yuyv422')
+VALID_PIX_FMT = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
 
 
 def scale_fr2lr_16_235(x):
@@ -17,7 +17,7 @@ def scale_fr2lr_16_235(x):
         return 235
     # f(x) = a * x + b
     # f(0) = a * 0 + b = 16
-    b = 16.
+    b = 16.0
     # f(255) = a * 255 + b = 235
     # a = (235 - b) / 255
     a = 0.8588235294117647
@@ -48,7 +48,7 @@ def scale_fr2lr_16_240(x):
         return 240
     # f(x) = a * x + b
     # f(0) = a * 0 + b = 16
-    b = 16.
+    b = 16.0
     # f(255) = a * 255 + b = 240
     # a = (240 - b) / 255
     a = 0.8784313725490196
@@ -90,32 +90,32 @@ def normalize(val):
 
 
 def is_yuv(pix_fmt):
-    if pix_fmt in ('yuv420p', 'nv12', 'yuv444p', 'yuyv422'):
+    if pix_fmt in ("yuv420p", "nv12", "yuv444p", "yuyv422"):
         return True
-    elif pix_fmt in ('rgba'):
+    elif pix_fmt in ("rgba"):
         return False
     # unsupported pix_fmt
-    print('error: unsupported format: %s' % pix_fmt)
+    print("error: unsupported format: %s" % pix_fmt)
     sys.exit(-1)
 
 
 # get frame size/luma size ratio
 def get_length_factor(pix_fmt):
-    if pix_fmt in ('yuv420p', 'nv12'):
+    if pix_fmt in ("yuv420p", "nv12"):
         return 1.5
-    elif pix_fmt in ('yuyv422'):
+    elif pix_fmt in ("yuyv422"):
         return 2
-    elif pix_fmt in ('yuv444p'):
+    elif pix_fmt in ("yuv444p"):
         return 3
-    elif pix_fmt in ('rgba'):
+    elif pix_fmt in ("rgba"):
         return 4
     # unsupported pix_fmt
-    print('error: unsupported format: %s' % pix_fmt)
+    print("error: unsupported format: %s" % pix_fmt)
     sys.exit(-1)
 
 
 def read_image(fin, w, h, pix_fmt, frame_number=0):
-    data = array('B')
+    data = array("B")
 
     # calculate the frame size
     frame_size = int(w * h * get_length_factor(pix_fmt))
@@ -127,37 +127,38 @@ def read_image(fin, w, h, pix_fmt, frame_number=0):
 
 
 def get_component_locations(i, j, w, h, pix_fmt):
-    if pix_fmt == 'yuv420p':
+    if pix_fmt == "yuv420p":
         # planar format, 4:2:0
-        return ((w * j) + i,
-                (w * h) + ((w // 2) * (j // 2)) + (i // 2),
-                (w * h) + ((w // 2) * (h // 2)) +
-                ((w // 2) * (j // 2)) + (i // 2))
-    elif pix_fmt == 'nv12':
+        return (
+            (w * j) + i,
+            (w * h) + ((w // 2) * (j // 2)) + (i // 2),
+            (w * h) + ((w // 2) * (h // 2)) + ((w // 2) * (j // 2)) + (i // 2),
+        )
+    elif pix_fmt == "nv12":
         # semi-planar format, 4:2:0
-        return ((w * j) + i,
-                (w * h) + ((w // 2) * 2 * (j // 2)) + 2 * (i // 2),
-                (w * h) + ((w // 2) * 2 * (j // 2)) + 2 * (i // 2) + 1)
-    elif pix_fmt == 'yuv444p':
+        return (
+            (w * j) + i,
+            (w * h) + ((w // 2) * 2 * (j // 2)) + 2 * (i // 2),
+            (w * h) + ((w // 2) * 2 * (j // 2)) + 2 * (i // 2) + 1,
+        )
+    elif pix_fmt == "yuv444p":
         # planar format, 4:4:4, no alpha channel
-        return ((w * j) + i,
-                (w * h) + (w * j) + i,
-                2 * (w * h) + (w * j) + i)
-    elif pix_fmt == 'yuyv422':
+        return ((w * j) + i, (w * h) + (w * j) + i, 2 * (w * h) + (w * j) + i)
+    elif pix_fmt == "yuyv422":
         # packed format, 4:2:2, no alpha channel
         # Y00 U00 Y01 V00  Y02 U02 Y03 V02
-        first_luma_in_group = (i % 2 == 0)
+        first_luma_in_group = i % 2 == 0
         u_shift = +1 if first_luma_in_group else -1
         v_shift = +3 if first_luma_in_group else +1
-        return ((w * j * 2) + i * 2,
-                (w * j * 2) + i * 2 + u_shift,
-                (w * j * 2) + i * 2 + v_shift)
-    elif pix_fmt == 'rgba':
+        return (
+            (w * j * 2) + i * 2,
+            (w * j * 2) + i * 2 + u_shift,
+            (w * j * 2) + i * 2 + v_shift,
+        )
+    elif pix_fmt == "rgba":
         # packed format, 4:4:4, includes alpha channel
-        return ((w * j * 4) + i * 4,
-                (w * j * 4) + i * 4 + 1,
-                (w * j * 4) + i * 4 + 2)
+        return ((w * j * 4) + i * 4, (w * j * 4) + i * 4 + 1, (w * j * 4) + i * 4 + 2)
     else:
         # unsupported pix_fmt
-        print('error: unsupported format: %s' % pix_fmt)
+        print("error: unsupported format: %s" % pix_fmt)
         sys.exit(-1)
