@@ -6,7 +6,7 @@ from array import array
 import sys
 
 
-VALID_PIX_FMT = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
+PIX_FMTS = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
 
 
 def scale_fr2lr_16_235(x):

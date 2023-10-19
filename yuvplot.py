@@ -18,7 +18,7 @@ FONTSIZE_SMALL = 10
 FONTSIZE_MEDIUM = 11
 FONTSIZE_BIG = 16
 
-VALID_PIX_FMT = ["yuv420p", "nv12"]
+PIX_FMTS = ["yuv420p", "nv12"]
 
 IMAGE_NAME = None
 
@@ -389,9 +389,9 @@ def get_options(argv):
         type=str,
         dest="pix_fmt",
         default="yuv420p",
-        choices=VALID_PIX_FMT,
+        choices=PIX_FMTS,
         metavar="PIX_FMT",
-        help=("chroma format %r" % VALID_PIX_FMT),
+        help=("chroma format %r" % PIX_FMTS),
     )
     parser.add_argument(
         "-n", "--frame_number", required=False, help="frame number", type=int, default=0

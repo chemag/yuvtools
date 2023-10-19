@@ -13,7 +13,7 @@ import yuvcommon
 
 
 TV_LIST = ["sdtv", "hdtv"]
-VALID_FUNCTIONS = ["rgb2yuv", "yuv2rgb"]
+FUNCTIONS = ["rgb2yuv", "yuv2rgb"]
 
 default_values = {
     "debug": 0,
@@ -307,10 +307,10 @@ def get_options(argv):
     # do the parsing
     options = parser.parse_args(argv[1:])
     # check the values
-    if options.func not in VALID_FUNCTIONS:
+    if options.func not in FUNCTIONS:
         print(
             "error: invalid function (%s). Must be one of %s"
-            % (options.func, ",".join(VALID_FUNCTIONS))
+            % (options.func, ",".join(FUNCTIONS))
         )
         sys.exit(-1)
     if (

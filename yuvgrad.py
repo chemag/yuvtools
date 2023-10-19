@@ -10,7 +10,7 @@ import copy
 import sys
 import yuvcommon
 
-VALID_PIX_FMT = ("yuv420p", "nv12")
+PIX_FMTS = ("yuv420p", "nv12")
 RANGE_LIST = ("full", "limited")
 PREDEFINED_IMAGE_LIST = (
     "color",
@@ -454,11 +454,11 @@ def get_options(argv):
         type=str,
         dest="pix_fmt",
         default=default_values["pix_fmt"],
-        choices=VALID_PIX_FMT,
+        choices=PIX_FMTS,
         metavar="PIX_FMT",
         help=(
             "chroma format %r (default: %s)"
-            % (VALID_PIX_FMT, default_values["pix_fmt"])
+            % (PIX_FMTS, default_values["pix_fmt"])
         ),
     )
     parser.add_argument(

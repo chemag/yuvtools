@@ -11,7 +11,7 @@ from array import array
 import sys
 import yuvcommon
 
-VALID_PIX_FMT = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
+PIX_FMTS = ("yuv420p", "nv12", "rgba", "yuv444p", "yuyv422")
 
 
 # conversion data
@@ -433,11 +433,11 @@ def get_options(argv):
         type=str,
         dest="ipix_fmt",
         default=default_values["ipix_fmt"],
-        choices=VALID_PIX_FMT,
+        choices=PIX_FMTS,
         metavar="INPUT_PIX_FMT",
         help=(
             "input pixel format %r (default: %s)"
-            % (VALID_PIX_FMT, default_values["ipix_fmt"])
+            % (PIX_FMTS, default_values["ipix_fmt"])
         ),
     )
     parser.add_argument(
@@ -446,11 +446,11 @@ def get_options(argv):
         type=str,
         dest="opix_fmt",
         default=default_values["opix_fmt"],
-        choices=VALID_PIX_FMT,
+        choices=PIX_FMTS,
         metavar="OUTPUT_PIX_FMT",
         help=(
             "output pixel format %r (default: %s)"
-            % (VALID_PIX_FMT, default_values["opix_fmt"])
+            % (PIX_FMTS, default_values["opix_fmt"])
         ),
     )
     parser.add_argument(
