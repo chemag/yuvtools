@@ -146,10 +146,10 @@ def show_cube_plot(options):
 
     # get conversion functions
     if options.convert_function is not None:
-        convert_rgb2yuv = yuvconv.VALID_CONVERSION_FUNCTION[options.convert_function][
+        convert_rgb2yuv = yuvconv.CONVERSION_FUNCTIONS[options.convert_function][
             "rgb2yuv"
         ]
-        convert_yuv2rgb = yuvconv.VALID_CONVERSION_FUNCTION[options.convert_function][
+        convert_yuv2rgb = yuvconv.CONVERSION_FUNCTIONS[options.convert_function][
             "yuv2rgb"
         ]
     elif options.tv_type == "sdtv":
@@ -315,11 +315,11 @@ def get_options(argv):
         sys.exit(-1)
     if (
         options.convert_function is not None
-        and options.convert_function not in yuvconv.VALID_CONVERSION_FUNCTION
+        and options.convert_function not in yuvconv.CONVERSION_FUNCTIONS
     ):
         print(
             "error: invalid conversion function (%s). Must be one of %s"
-            % (options.convert_function, ",".join(yuvconv.VALID_CONVERSION_FUNCTION))
+            % (options.convert_function, ",".join(yuvconv.CONVERSION_FUNCTIONS))
         )
         sys.exit(-1)
 

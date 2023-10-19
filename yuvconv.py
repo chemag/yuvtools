@@ -225,7 +225,15 @@ def convert_yuv2rgb_ycocgr(Y, Co, Cg):
     return R, G, B
 
 
-VALID_CONVERSION_FUNCTION = {
+CONVERSION_DIRECTIONS = (
+    "yuv2yuv",
+    "yuv2rgb",
+    "rgb2yuv",
+    "rgb2rgb",
+)
+
+
+CONVERSION_FUNCTIONS = {
     "unit": {
         "yuv2yuv": lambda x, y, z: (x, y, z),
         "rgb2rgb": lambda x, y, z: (x, y, z),
@@ -282,6 +290,7 @@ default_values = {
     "height": 720,
     "ipix_fmt": "yuv420p",
     "opix_fmt": "rgba",
+    "conversion_direction": None,
     "conversion_type": None,
     "yuv2yuv": "unit",
     "rgb2rgb": "unit",
@@ -290,25 +299,26 @@ default_values = {
 }
 
 
-def convert_image(idata, w, h, ipix_fmt, conversion_type, opix_fmt):
+def convert_image(idata, w, h, ipix_fmt, conversion_direction, conversion_type, opix_fmt):
     # allocate output array
     odata = array("B")
     oframe_size = int(w * h * yuvcommon.get_length_factor(opix_fmt))
     odata.extend([255] * oframe_size)
 
     # calculate the conversion direction
-    if yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
-        conversion_direction = "yuv2yuv"
-    elif yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
-        conversion_direction = "yuv2rgb"
-    elif not yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
-        conversion_direction = "rgb2yuv"
-    elif not yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
-        conversion_direction = "rgb2rgb"
+    if conversion_direction is None:
+        if yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
+            conversion_direction = "yuv2yuv"
+        elif yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
+            conversion_direction = "yuv2rgb"
+        elif not yuvcommon.is_yuv(ipix_fmt) and yuvcommon.is_yuv(opix_fmt):
+            conversion_direction = "rgb2yuv"
+        elif not yuvcommon.is_yuv(ipix_fmt) and not yuvcommon.is_yuv(opix_fmt):
+            conversion_direction = "rgb2rgb"
 
     if conversion_type is None:
         conversion_type = default_values[conversion_direction]
-    conversion_function = VALID_CONVERSION_FUNCTION[conversion_type][
+    conversion_function = CONVERSION_FUNCTIONS[conversion_type][
         conversion_direction
     ]
 
@@ -357,6 +367,7 @@ def process_options(options):
         options.width,
         options.height,
         options.ipix_fmt,
+        options.conversion_direction,
         options.conversion_type,
         options.opix_fmt,
     )
@@ -459,14 +470,29 @@ def get_options(argv):
         type=str,
         dest="conversion_type",
         default=default_values["conversion_type"],
-        choices=list(VALID_CONVERSION_FUNCTION.keys()),
+        choices=list(CONVERSION_FUNCTIONS.keys()),
         metavar="[%s]"
         % (
             " | ".join(
-                list(VALID_CONVERSION_FUNCTION.keys()),
+                list(CONVERSION_FUNCTIONS.keys()),
             )
         ),
         help="conversion type",
+    )
+    parser.add_argument(
+        "--direction",
+        action="store",
+        type=str,
+        dest="conversion_direction",
+        default=default_values["conversion_direction"],
+        choices=list(CONVERSION_FUNCTIONS.keys()),
+        metavar="[%s]"
+        % (
+            " | ".join(
+                list(CONVERSION_FUNCTIONS.keys()),
+            )
+        ),
+        help="conversion direction",
     )
     parser.add_argument(
         "-n", "--frame_number", required=False, help="frame number", type=int, default=0
