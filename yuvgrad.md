@@ -68,20 +68,19 @@ $ ffmpeg -f rawvideo -pixel_format nv12 -video_size 1280x720 -i /tmp/sdtv.uv.nv1
 
 The results are as follows: 
 
-[Image: image/out.nv12.grey.yuv.png]
+![Figure 1](image/out.nv12.grey.yuv.png)
 
 Figure 1 shows the grayscale image. Actual yuv images can be found here ([gray.nv12.fr.yuv](image/gray.nv12.fr.yuv), [gray.yuv420p.fr.yuv](image/gray.yuv420p.fr.yuv), [gray.nv12.lr.yuv](image/gray.nv12.lr.yuv), [gray.yuv420p.lr.yuv](image/gray.yuv420p.lr.yuv))
 
-[Image: image/out.nv12.yuv.png]
+![Figure 2](image/out.nv12.yuv.png)
 
 Figure 2 shows the color image. Actual yuv images can be found here ([color.nv12.fr.yuv](image/color.nv12.fr.yuv), [color.yuv420p.fr.yuv](image/color.yuv420p.fr.yuv), [color.nv12.lr.yuv](image/color.nv12.lr.yuv), [color.yuv420p.lr.yuv](image/color.yuv420p.lr.yuv))
 
-[Image: image/color_eee.nv12.fr.yuv.png]
+![Figure 3](image/color_eee.nv12.fr.yuv.png)
 
 Figure 3 shows the color_eee image. Actual yuv images can be found here ([color_eee.nv12.fr.yuv](image/color_eee.nv12.fr.yuv), [color_eee.yuv420p.fr.yuv](image/color_eee.yuv420p.fr.yuv), [color_eee.nv12.lr.yuv](image/color_eee.nv12.lr.yuv), [color_eee.yuv420p.lr.yuv](image/color_eee.yuv420p.lr.yuv)).
 
-
-[Image: image/sdtv.uv.nv12.fr.yuv.png]
+![Figure 4](image/sdtv.uv.nv12.fr.yuv.png)
 
 Figure 4 shows the sdtv.uv image. Actual yuv images can be found here ([sdtv.uv.nv12.fr.yuv](image/sdtv.uv.nv12.fr.yuv), [sdtv.uv.yuv420p.fr.yuv](image/sdtv.uv.yuv420p.fr.yuv), [sdtv.uv.nv12.lr.yuv](image/sdtv.uv.nv12.lr.yuv), [sdtv.uv.yuv420p.lr.yuv](image/sdtv.uv.yuv420p.lr.yuv))
 
