@@ -337,7 +337,7 @@ def convert_image(idata, w, h, ipix_fmt, conversion_name, opix_fmt):
 
 
 def process_options(options):
-    # open input fule
+    # open input file
     if options.infile != sys.stdin:
         fin = open(options.infile, 'rb')
     else:
@@ -438,15 +438,23 @@ def get_options(argv):
         type=int,
         default=0)
     parser.add_argument(
-        'infile', nargs='?', type=str,
+        "-i",
+        "--infile",
+        dest="infile",
+        type=str,
         default=None,
-        metavar='INPUT-FILE',
-        help='input file',)
+        metavar="input-file",
+        help="input file",
+    )
     parser.add_argument(
-        'outfile', nargs='?', type=str,
+        "-o",
+        "--outfile",
+        dest="outfile",
+        type=str,
         default=None,
-        metavar='OUTPUT-FILE',
-        help='output file',)
+        metavar="output-file",
+        help="output file",
+    )
     # do the parsing
     options = parser.parse_args(argv[1:])
     return options
