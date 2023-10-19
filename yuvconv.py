@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates.
 
 """yuvconv: An rgb2yuv/yuv2rgb converter.
 
@@ -199,9 +198,9 @@ def convert_yuv2rgb_ycbcr_hdtv_computer(Y, Cb, Cr):
 
 # YCoCg Color Space (https://en.wikipedia.org/wiki/YCoCg)
 def convert_rgb2yuv_ycocg(R, G, B):
-    Y  =  R >> 2 + G >> 1 + B >> 2  # NOQA: E221,E222
-    Co =  R >> 1          - B >> 1  # NOQA: E221,E222
-    Cg = -R >> 2 + G >> 1 - B >> 2  # NOQA: E221,E222
+    Y  = ( R >> 2) + (G >> 1) + (B >> 2)  # NOQA: E221,E222
+    Co = ( R >> 1)            - (B >> 1)  # NOQA: E221,E222
+    Cg = (-R >> 2) + (G >> 1) - (B >> 2)  # NOQA: E221,E222
     # no normalization needed
     return Y, Co, Cg
 

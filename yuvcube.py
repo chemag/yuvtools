@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-# Copyright (c) Facebook, Inc. and its affiliates.
+
+"""yuvcube: A YUV Cube creator."""
+
 
 import argparse
 from mpl_toolkits.mplot3d.art3d import Line3DCollection

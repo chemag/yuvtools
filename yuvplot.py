@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates.
+
+"""yuvplot: A YUV plotter."""
+
 
 from __future__ import print_function
 
