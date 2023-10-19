@@ -13,9 +13,15 @@ import yuvcommon
 
 
 TV_LIST = ['sdtv', 'hdtv']
-default = {
+VALID_FUNCTIONS = ['rgb2yuv', 'yuv2rgb']
+
+default_values = {
+    'debug': 0,
+    'dry_run': False,
     'num_vertices': 2,
     'tv_type': 'sdtv',
+    'convert_function': None,
+    'func': 'yuv2rgb',
 }
 
 
@@ -116,92 +122,62 @@ def remove_valid_elements(xs, ys, zs, reverse=False):
     return xos, yos, zos
 
 
-def plot_cube(options):
-    # create input data
-    line = generate_equidistant_list(0, 255, options.num_vertices)
-    if options.func == 'rgb2yuv':
-        # start with rgb
-        rs, gs, bs = generate_cube(line)
-    else:  # 'yuv2rgb':
-        # start with yuv
-        ys, us, vs = generate_cube(line)
-
+def show_cube_plot(options):
     if not options.saturation:
         yuvcommon.DO_NOT_NORMALIZE = True
 
     # get conversion functions
-    if options.tv_type == 'sdtv':
+    if options.convert_function is not None:
+        convert_rgb2yuv = (
+            yuvconv.VALID_CONVERSION_FUNCTION[options.convert_function]
+            ['rgb2yuv'])
+        convert_yuv2rgb = (
+            yuvconv.VALID_CONVERSION_FUNCTION[options.convert_function]
+            ['yuv2rgb'])
+    elif options.tv_type == 'sdtv':
         convert_rgb2yuv = yuvconv.convert_rgb2yuv_ycbcr_sdtv_computer
         convert_yuv2rgb = yuvconv.convert_yuv2rgb_ycbcr_sdtv_computer
     elif options.tv_type == 'hdtv':
         convert_rgb2yuv = yuvconv.convert_rgb2yuv_ycbcr_hdtv_computer
         convert_yuv2rgb = yuvconv.convert_yuv2rgb_ycbcr_hdtv_computer
 
-    if options.func == 'rgb2yuv':
-        # convert to yuv
-        ys, us, vs = convert_cube(rs, gs, bs, convert_rgb2yuv)
-    else:  # 'yuv2rgb':
-        # convert to rgb
-        rs, gs, bs = convert_cube(ys, us, vs, convert_yuv2rgb)
+    # decide the order
+    fun1 = convert_rgb2yuv if options.func == 'rgb2yuv' else convert_yuv2rgb
+    fun2 = convert_rgb2yuv if options.func == 'yuv2rgb' else convert_yuv2rgb
 
-    if not options.saturation:
-        # # remove valid elements from the produced cube
-        # if options.func == 'rgb2yuv':
-        #     ys, us, vs = remove_valid_elements(ys, us, vs)
-        # else:  # 'yuv2rgb':
-        #     rs, gs, bs = remove_valid_elements(rs, gs, bs)
-        0
+    # 0. start with a comparison cube with no vertices
+    line = generate_equidistant_list(0, 255, options.num_vertices)
+    x0s, y0s, z0s, = generate_cube(line)
+    color0 = 'k'
 
-    else:
-        # convert back to the original coordinate system
-        if options.func == 'rgb2yuv':
-            # convert back to rgb
-            r2s, g2s, b2s = convert_cube(ys, us, vs, convert_yuv2rgb)
-        else:  # 'yuv2rgb':
-            # convert back to yuv
-            y2s, u2s, v2s = convert_cube(rs, gs, bs, convert_rgb2yuv)
+    # 1. convert comparison cube
+    x1s, y1s, z1s = convert_cube(x0s, y0s, z0s, fun1)
+    color1 = 'r' if options.func == 'rgb2yuv' else 'g'
+
+    # 2. convert back to the original coordinate system
+    x2s, y2s, z2s = convert_cube(x1s, y1s, z1s, fun2)
+    color2 = 'b'
 
     # init the plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    # ax.scatter3D(ys, us, vs, color=color)
-    # add_cube_sides(options.debug, ax, ys, us, vs)
+    # start plotting the comparison cube
+    ax.scatter3D(x0s, y0s, z0s, color=color0, marker='X')
+    add_cube_sides(False, ax, x0s, y0s, z0s, color=color0, alpha=.1)
 
-    if not options.saturation:
-        if options.func == 'rgb2yuv':
-            ax.scatter3D(ys, us, vs, color='g')
-            add_cube_sides(options.debug, ax, ys, us, vs, color='g', alpha=0.2)
-            ax.set_xlabel('Y')
-            ax.set_ylabel('U')
-            ax.set_zlabel('V')
-        else:  # 'yuv2rgb':
-            ax.scatter3D(rs, gs, bs, color='r')
-            add_cube_sides(options.debug, ax, rs, gs, bs, color='r', alpha=0.2)
-            ax.set_xlabel('R')
-            ax.set_ylabel('G')
-            ax.set_zlabel('B')
+    # plot the first conversion
+    ax.scatter3D(x1s, y1s, z1s, color=color1)
+    add_cube_sides(options.debug, ax, x1s, y1s, z1s, color=color1, alpha=0.2)
 
-    else:
-        if options.func == 'rgb2yuv':
-            ax.scatter3D(r2s, g2s, b2s, color='r')
-            add_cube_sides(options.debug, ax, r2s, g2s, b2s, color='r',
-                           alpha=0.2)
-            ax.set_xlabel('R')
-            ax.set_ylabel('G')
-            ax.set_zlabel('B')
-        else:  # 'yuv2rgb':
-            ax.scatter3D(y2s, u2s, v2s, color='g')
-            add_cube_sides(options.debug, ax, y2s, u2s, v2s, color='g',
-                           alpha=0.2)
-            ax.set_xlabel('Y')
-            ax.set_ylabel('U')
-            ax.set_zlabel('V')
+    # then plot the back conversion
+    ax.scatter3D(x2s, y2s, z2s, color=color2)
+    add_cube_sides(options.debug, ax, x2s, y2s, z2s, color=color2, alpha=0.2)
 
-    # add a comparison cube
-    l2 = (0, 255)
-    xss, yss, zss, = generate_cube(l2)
-    add_cube_sides(False, ax, xss, yss, zss, color='k', alpha=.1)
+    # add labels
+    ax.set_xlabel('Y/R')
+    ax.set_ylabel('U/G')
+    ax.set_zlabel('V/B')
 
     # homogeneize limits
     xlim, ylim, zlim = ax.get_xlim(), ax.get_ylim(), ax.get_zlim()
@@ -230,17 +206,18 @@ def get_options(argv):
     # parser.print_usage() to get argparse.usage (just usage line)
     parser = argparse.ArgumentParser(description='Generic runner argparser.')
     parser.add_argument('-d', '--debug', action='count',
-                        dest='debug', default=0,
+                        dest='debug', default=default_values['debug'],
                         help='Increase verbosity (multiple times for more)',)
     parser.add_argument('--quiet', action='store_const',
                         dest='debug', const=-1,
                         help='Zero verbosity',)
     parser.add_argument('--numv', action='store', type=int,
-                        dest='num_vertices', default=default['num_vertices'],
+                        dest='num_vertices',
+                        default=default_values['num_vertices'],
                         metavar='NUM_VERTICES',
                         help='use NUM_VERTICES vertices',)
     parser.add_argument('--tv-type', action='store', nargs=1,
-                        dest='tv_type', default=default['tv_type'],
+                        dest='tv_type', default=default_values['tv_type'],
                         choices=TV_LIST,
                         help='use TYPE for tv type',)
     parser.add_argument('--sdtv', action='store_const',
@@ -249,23 +226,35 @@ def get_options(argv):
     parser.add_argument('--hdtv', action='store_const',
                         dest='tv_type', const='hdtv',
                         help='use HDTV for tv type',)
+    parser.add_argument('--saturation', dest='saturation', action='store_true',
+                        default=False,
+                        help='Plot saturated parallelepiped',)
     parser.add_argument('--unscaled-transform', dest='saturation',
                         action='store_false', default=False,
                         help='Plot unscaled transform',)
-    parser.add_argument('--saturation', dest='saturation', action='store_true',
-                        default=False,
-                        help='Plot saturation parallelepiped',)
-    # add sub-command parsers
-    subparsers = parser.add_subparsers()
-    # independent sub-commands
-    parser_rgb2yuv = subparsers.add_parser('rgb2yuv',
-                                           help='plot a rgb2yuv matrix')
-    parser_rgb2yuv.set_defaults(func='rgb2yuv')
-    parser_yuv2rgb = subparsers.add_parser('yuv2rgb',
-                                           help='plot a yuv2rgb matrix')
-    parser_yuv2rgb.set_defaults(func='yuv2rgb')
+    parser.add_argument('--convert', action='store', type=str,
+                        dest='convert_function',
+                        default=default_values['convert_function'],
+                        help='Use a specific convert function',)
+    parser.add_argument('func', type=str,
+                        default=default_values['func'],
+                        metavar='function',
+                        help='function',)
+
     # do the parsing
     options = parser.parse_args(argv[1:])
+    # check the values
+    if options.func not in VALID_FUNCTIONS:
+        print('error: invalid function (%s). Must be one of %s' % (
+              options.func, ','.join(VALID_FUNCTIONS)))
+        sys.exit(-1)
+    if (options.convert_function is not None and
+            options.convert_function not in yuvconv.VALID_CONVERSION_FUNCTION):
+        print('error: invalid conversion function (%s). Must be one of %s' % (
+              options.convert_function,
+              ','.join(yuvconv.VALID_CONVERSION_FUNCTION)))
+        sys.exit(-1)
+
     return options
 
 
@@ -276,7 +265,7 @@ def main(argv):
     if options.debug > 0:
         print(options)
     # do something
-    plot_cube(options)
+    show_cube_plot(options)
 
 
 if __name__ == '__main__':
