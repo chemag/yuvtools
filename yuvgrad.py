@@ -76,7 +76,7 @@ predefined_images['color_eee']['vgrad'] = 'E'
 # SDTV images
 # details at conversions.md
 # produced using:
-# $ ./yuvtools/yuvcube.py -dd --unscaled-transform --sdtv rgb2yuv
+# $ ./yuvcube.py -dd --unscaled-transform --sdtv rgb2yuv
 SDTV_CUBE = (
     (16, 128, 128),
     (40, 239, 109),
@@ -91,7 +91,7 @@ SDTV_CUBE = (
 # HDTV images
 # details at conversions.md
 # produced using:
-# $ ./yuvtools/yuvcube.py -dd --unscaled-transform --hdtv rgb2yuv
+# $ ./yuvcube.py -dd --unscaled-transform --hdtv rgb2yuv
 HDTV_CUBE = (
     (16, 128, 128),
     (31, 239, 117),
