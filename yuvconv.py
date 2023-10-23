@@ -32,7 +32,7 @@ H273_MATRIX_COEFFICIENTS = {
     14: {},  # ICTCP (Rec. ITU-R BT.2100-2 ICTCP)
 }
 
-H273_MATRIX_COEFFICIENTS_LIST = (0, 1, 4, 5, 6, 7, 8, 9, 11, 13, 14)
+H273_MATRIX_COEFFICIENTS_LIST = (0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14)
 
 
 # conversion data
@@ -431,7 +431,6 @@ def convert_yuv2rgb_h273(Y, U, V, mc, color_range_yuv, color_range_rgb):
         )
         matrix = np.linalg.inv(inv_matrix)
         (ER, EG, EB, _) = matrix @ (EY, EU, EV, 1)
-
     elif mc == 0:
         Y, Cb, Cr = Y, U, V
         G = h273_Round(Y)  # Equation (41)
@@ -470,7 +469,25 @@ def convert_yuv2rgb_h273(Y, U, V, mc, color_range_yuv, color_range_rgb):
         B = h273_Clip1Y(B, BitDepthY)
         return (R, G, B)
     elif mc in (10, 13):
-        raise AssertionError(f"unsupported mc: {mc}")
+        EY, EPB, EPR = EY, EU - 0.5, EV - 0.5
+        if mc == 10:
+            # TODO(chemag): assuming NB == PB and NR == PR
+            # Kr = 0.2627
+            # Kb = 0.0593
+            # NB = 1 - Kb  # Equation (65)
+            # NR = 1 - Kr  # Equation (67)
+            # matrix_rgb2yuv = np.array([[Kr, (1 - Kr - Kb), Kb], [-Kr / (2 * NB), -(1 - Kr - Kb) / (2 * NB), (1 - Kb) / (2 * NB)], [(1 - Kr) / (2 * NR), -(1 - Kr - Kb) / (2 * NR), -Kb/(2 * NR)]])
+            # np.linalg.inv(matrix_rgb2yuv)
+            matrix = np.array(
+                [
+                    [1.0, -5.55111512e-17, 1.47460000e00],
+                    [1.0, -1.64553127e-01, -5.71353127e-01],
+                    [1.0, 1.88140000e00, 2.38961873e-17],
+                ]
+            )
+            ER, EG, EB = matrix @ (EY, EPB, EPR)
+        elif mc == 13:
+            raise AssertionError(f"unsupported mc: {mc}")
     elif mc == 11:
         EY, EPB, EPR = EY, EU - 0.5, EV - 0.5
         # m = np.array([[0.0, 1.0, 0.0], [0.0, -1.0 / 2.0, 0.986566 / 2.0], [1.0 / 2.0, - 0.991902 / 2.0, 0.0]])
@@ -483,7 +500,6 @@ def convert_yuv2rgb_h273(Y, U, V, mc, color_range_yuv, color_range_rgb):
             ]
         )
         ER, EG, EB = matrix @ (EY, EPB, EPR)
-
     elif mc == 14:
         EY, EPB, EPR = EY, EU - 0.5, EV - 0.5
         # m = np.array([[0.5, 0.5, 0.0], [6610/4096, -7465/4096, 3840/4096], [9500/4096, - 9212/4096, - 288/4096]])
