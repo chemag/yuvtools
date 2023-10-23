@@ -32,7 +32,7 @@ H273_MATRIX_COEFFICIENTS = {
     14: {},  # ICTCP (Rec. ITU-R BT.2100-2 ICTCP)
 }
 
-H273_MATRIX_COEFFICIENTS_LIST = (0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14)
+H273_MATRIX_COEFFICIENTS_LIST = (0, 1, 4, 5, 6, 7, 8, 9, 11, 13, 14)
 
 
 # conversion data
