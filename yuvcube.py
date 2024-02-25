@@ -175,11 +175,9 @@ def show_cube_plot(options):
         y0s,
         z0s,
     ) = generate_cube(line)
-    color0 = "k"
 
     # 1. convert comparison cube
     x1s, y1s, z1s = convert_cube(x0s, y0s, z0s, fun1)
-    color1 = "r" if options.func == "rgb2yuv" else "g"
     if options.clip:
         x1s = list(clip_value(x) for x in x1s)
         y1s = list(clip_value(x) for x in y1s)
@@ -187,11 +185,16 @@ def show_cube_plot(options):
 
     # 2. convert back to the original coordinate system
     x2s, y2s, z2s = convert_cube(x1s, y1s, z1s, fun2)
-    color2 = "b"
     if options.clip:
         x2s = list(clip_value(x) for x in x2s)
         y2s = list(clip_value(x) for x in y2s)
         z2s = list(clip_value(x) for x in z2s)
+
+    # 3. set colors: gray for YUV, red for RGB
+    if options.func == "rgb2yuv":
+        color0, color1, color2 = "red", "black", "orange"
+    else:  # options.func == "yuv2rgb"
+        color0, color1, color2 = "black", "r", "gray"
 
     # init the plot
     fig = plt.figure()
