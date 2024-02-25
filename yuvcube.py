@@ -17,6 +17,7 @@ FUNCTIONS = ["rgb2yuv", "yuv2rgb"]
 
 default_values = {
     "debug": 0,
+    "clip": True,
     "num_vertices": 2,
     "tv_type": "sdtv",
     "convert_function": None,
@@ -140,6 +141,10 @@ def remove_valid_elements(xs, ys, zs, reverse=False):
     return xos, yos, zos
 
 
+def clip_value(x, minx=0, maxx=255):
+    return minx if x < minx else (maxx if x > maxx else x)
+
+
 def show_cube_plot(options):
     if not options.saturation:
         yuvcommon.DO_NOT_NORMALIZE = True
@@ -175,10 +180,18 @@ def show_cube_plot(options):
     # 1. convert comparison cube
     x1s, y1s, z1s = convert_cube(x0s, y0s, z0s, fun1)
     color1 = "r" if options.func == "rgb2yuv" else "g"
+    if options.clip:
+        x1s = list(clip_value(x) for x in x1s)
+        y1s = list(clip_value(x) for x in y1s)
+        z1s = list(clip_value(x) for x in z1s)
 
     # 2. convert back to the original coordinate system
     x2s, y2s, z2s = convert_cube(x1s, y1s, z1s, fun2)
     color2 = "b"
+    if options.clip:
+        x2s = list(clip_value(x) for x in x2s)
+        y2s = list(clip_value(x) for x in y2s)
+        z2s = list(clip_value(x) for x in z2s)
 
     # init the plot
     fig = plt.figure()
@@ -242,6 +255,19 @@ def get_options(argv):
         dest="debug",
         const=-1,
         help="Zero verbosity",
+    )
+    parser.add_argument(
+        "--clip",
+        action="store_true",
+        dest="clip",
+        default=default_values["clip"],
+        help="Clip values to [0, 255] [default: %s]" % default_values["clip"],
+    )
+    parser.add_argument(
+        "--no-clip",
+        action="store_false",
+        dest="clip",
+        help="Do not clip values to [0, 255] [default: %s]" % default_values["clip"],
     )
     parser.add_argument(
         "--numv",
