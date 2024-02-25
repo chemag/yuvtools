@@ -200,6 +200,8 @@ def show_cube_plot(options):
 
     # 4.1. init the plot
     fig = plt.figure()
+    window_title = f"{options.func} clip: {options.clip}"
+    fig.canvas.manager.set_window_title(window_title)
     ax = fig.add_subplot(111, projection="3d")
 
     # coordinate system matching: Y-G, U-B, V-R
