@@ -254,6 +254,14 @@ def show_cube_plot(options):
     ax.set_xlim(lim_min, lim_max)
     ax.set_ylim(lim_min, lim_max)
     ax.set_zlim(lim_min, lim_max)
+    if not options.clip and options.func == "yuv2rgb":
+        ax.set_xticks([-512, -256, 0, 128, 256, 512])
+        ax.set_yticks([-512, -256, 0, 128, 256, 512])
+        ax.set_zticks([-512, -256, 0, 128, 256, 512])
+    else:  # options.func == "yuv2rgb":
+        ax.set_xticks([0, 128, 256])
+        ax.set_yticks([0, 128, 256])
+        ax.set_zticks([0, 128, 256])
 
     plt.show()
 
