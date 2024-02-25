@@ -25,7 +25,7 @@ default_values = {
 
 
 # https://stackoverflow.com/questions/44881885/python-draw-parallelepiped/49766400
-def add_cube_sides(debug, ax, xs, ys, zs, color="k", **kwargs):
+def add_cube_sides(debug, ax, xs, ys, zs, color="k", linestyle="solid", **kwargs):
     # ax.scatter3D(xs, ys, zs, color=color)
     # r = [-1,1]
     # X, Y = np.meshgrid(r, r)
@@ -86,6 +86,7 @@ def add_cube_sides(debug, ax, xs, ys, zs, color="k", **kwargs):
         Z[6][1] - Z[0][1],
         Z[6][2] - Z[0][2],
         color=color,
+        linestyle=linestyle,
     )
 
 
@@ -189,11 +190,12 @@ def show_cube_plot(options):
 
     # plot the first conversion
     ax.scatter3D(x1s, y1s, z1s, color=color1)
-    add_cube_sides(options.debug, ax, x1s, y1s, z1s, color=color1, alpha=0.2)
+    add_cube_sides(options.debug, ax, x1s, y1s, z1s, color=color1, alpha=0.2, linestyle="dashed")
 
     # then plot the back conversion
     ax.scatter3D(x2s, y2s, z2s, color=color2)
-    add_cube_sides(options.debug, ax, x2s, y2s, z2s, color=color2, alpha=0.2)
+    add_cube_sides(options.debug, ax, x2s, y2s, z2s, color=color2, alpha=0.2, linestyle="dashed")
+
 
     # add labels
     ax.set_xlabel("Y/R")
