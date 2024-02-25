@@ -300,9 +300,8 @@ def get_options(argv):
         "func",
         type=str,
         default=default_values["func"],
-        choices=FUNCTIONS.keys(),
-        help="%s"
-        % (" | ".join("{}: {}".format(k, v) for k, v in FUNCTIONS.items())),
+        choices=FUNCTIONS,
+        help="%s" % (" | ".join(FUNCTIONS)),
     )
 
     # do the parsing
