@@ -17,7 +17,6 @@ FUNCTIONS = ["rgb2yuv", "yuv2rgb"]
 
 default_values = {
     "debug": 0,
-    "dry_run": False,
     "num_vertices": 2,
     "tv_type": "sdtv",
     "convert_function": None,
