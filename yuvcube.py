@@ -196,29 +196,58 @@ def show_cube_plot(options):
     else:  # options.func == "yuv2rgb"
         color0, color1, color2 = "black", "r", "gray"
 
-    # init the plot
+    # 4. plot the cubes
+
+    # 4.1. init the plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
-    # start plotting the comparison cube
-    ax.scatter3D(x0s, y0s, z0s, color=color0, marker="X")
-    add_cube_sides(False, ax, x0s, y0s, z0s, color=color0, alpha=0.1)
+    # coordinate system matching: Y-G, U-B, V-R
+    def match_coordinates(xs, ys, zs, src_yuv=True):
+        if src_yuv:
+            return xs, ys, zs
+        else:
+            return ys, zs, xs
 
-    # plot the first conversion
-    ax.scatter3D(x1s, y1s, z1s, color=color1)
-    add_cube_sides(options.debug, ax, x1s, y1s, z1s, color=color1, alpha=0.2, linestyle="dashed")
+    # 4.2. start plotting the comparison cube
+    xcube0, ycube0, zcube0 = match_coordinates(x0s, y0s, z0s, options.func == "yuv2rgb")
+    ax.scatter3D(xcube0, ycube0, zcube0, color=color0, marker="X")
+    add_cube_sides(False, ax, xcube0, ycube0, zcube0, color=color0, alpha=0.1)
 
-    # then plot the back conversion
-    ax.scatter3D(x2s, y2s, z2s, color=color2)
-    add_cube_sides(options.debug, ax, x2s, y2s, z2s, color=color2, alpha=0.2, linestyle="dashed")
+    # 4.3. plot the first conversion
+    xcube1, ycube1, zcube1 = match_coordinates(x1s, y1s, z1s, options.func == "yuv2rgb")
+    ax.scatter3D(xcube1, ycube1, zcube1, color=color1)
+    add_cube_sides(
+        options.debug,
+        ax,
+        xcube1,
+        ycube1,
+        zcube1,
+        color=color1,
+        alpha=0.2,
+        linestyle="dashed",
+    )
 
+    # 4.4. then plot the back conversion
+    xcube2, ycube2, zcube2 = match_coordinates(x2s, y2s, z2s, options.func == "yuv2rgb")
+    ax.scatter3D(xcube2, ycube2, zcube2, color=color2)
+    add_cube_sides(
+        options.debug,
+        ax,
+        xcube2,
+        ycube2,
+        zcube2,
+        color=color2,
+        alpha=0.2,
+        linestyle="dashed",
+    )
 
-    # add labels
-    ax.set_xlabel("Y/R")
-    ax.set_ylabel("U/G")
-    ax.set_zlabel("V/B")
+    # 4.5. add labels
+    ax.set_xlabel("Y/G")
+    ax.set_ylabel("U/B")
+    ax.set_zlabel("V/R")
 
-    # homogeneize limits
+    # 4.6. homogeneize limits
     xlim, ylim, zlim = ax.get_xlim(), ax.get_ylim(), ax.get_zlim()
     lim_min = min(xlim[0], ylim[0], zlim[0])
     lim_max = max(xlim[1], ylim[1], zlim[1])
